@@ -7,3 +7,6 @@
 [submodule "lib/perp-curie-contract"]
 	path = lib/perp-curie-contract
 	url = https://github.com/perpetual-protocol/perp-curie-contract
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com//OpenZeppelin/openzeppelin-contracts
