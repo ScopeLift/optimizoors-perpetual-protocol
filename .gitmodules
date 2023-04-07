@@ -4,3 +4,6 @@
 [submodule "lib/solmate"]
 	path = lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "lib/perp-curie-contract"]
+	path = lib/perp-curie-contract
+	url = https://github.com/perpetual-protocol/perp-curie-contract
