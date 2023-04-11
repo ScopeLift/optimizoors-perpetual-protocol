@@ -24,3 +24,9 @@
   single_line_statement_blocks = "single"
   tab_width = 2
   wrap_comments = true
+
+# ===============================
+# ======== RPC Endpoints ========
+# ===============================
+[rpc_endpoints]
+optimism = "${OPTIMISM_RPC_URL}"
