@@ -29,4 +29,4 @@
 # ======== RPC Endpoints ========
 # ===============================
 [rpc_endpoints]
-optimism = "${OPTIMISM_RPC_URL}"
+  optimism = "${OPTIMISM_RPC_URL}"

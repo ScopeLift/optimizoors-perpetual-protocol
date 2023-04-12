@@ -27,7 +27,7 @@ contract RouterForkTestBase is Test {
 }
 
 contract OpenPositionLongInputFork is RouterForkTestBase {
-  function testOpenPosition() public {
+  function test_OpenPosition() public {
     delegateApproval.approve(address(factory.computeAddress(VWETH)), 1); //
     (uint256 base, uint256 quote,) =
       IOpenPosition(factory.computeAddress(VWETH)).openPosition(1 ether, 0, 0);
