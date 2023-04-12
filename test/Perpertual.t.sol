@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-// Basic test through the router
-// Make sure everything is working
-// Get initial gas estimates
 import "forge-std/Test.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IVault} from "src/interface/IVault.sol";
@@ -12,7 +9,6 @@ import {IOpenPosition} from "src/interface/IOpenPosition.sol";
 import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
 
 contract RouterForkTestBase is Test {
-    // Optimism data
     IClearingHouse clearingHouse =
         IClearingHouse(0x82ac2CE43e33683c58BE4cDc40975E73aA50f459);
     IVault vault = IVault(0xAD7b4C162707E0B2b5f6fdDbD3f8538A5fbA0d60);
@@ -28,8 +24,6 @@ contract RouterForkTestBase is Test {
         factory = new PerpetualRouterFactory(clearingHouse);
         factory.deploy(vWETH);
         deal(address(this), 100 ether);
-        // delegate approval first
-        // change main contract to use openPositionFor
         vault.depositEther{value: 10 ether}();
     }
 }
