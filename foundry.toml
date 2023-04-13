@@ -24,6 +24,10 @@
   single_line_statement_blocks = "single"
   tab_width = 2
   wrap_comments = true
+  ignore = [
+    "src/interface/IClearingHouse.sol"
+    "src/interface/IVault.sol"
+  ]
 
 # ===============================
 # ======== RPC Endpoints ========
