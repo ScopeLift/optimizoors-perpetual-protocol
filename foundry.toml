@@ -16,6 +16,7 @@
 
 [fmt]
   bracket_spacing = false
+  ignore = ["src/interface/IClearingHouse.sol", "src/interface/IVault.sol"]
   int_types = "long"
   line_length = 100
   multiline_func_header = "attributes_first"
@@ -24,10 +25,6 @@
   single_line_statement_blocks = "single"
   tab_width = 2
   wrap_comments = true
-  ignore = [
-    "src/interface/IClearingHouse.sol"
-    "src/interface/IVault.sol"
-  ]
 
 # ===============================
 # ======== RPC Endpoints ========
