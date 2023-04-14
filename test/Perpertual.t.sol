@@ -11,9 +11,9 @@ import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
 
 contract RouterFactoryTest is Test {
   function test_deployRouter() public {
-    address VETH = 0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB;
+    // Opitimism addresses
 
-    // Random address
+    address VETH = 0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB;
     IClearingHouse clearingHouse = IClearingHouse(0x82ac2CE43e33683c58BE4cDc40975E73aA50f459);
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
             clearingHouse
