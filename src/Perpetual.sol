@@ -7,7 +7,6 @@ import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {Create2} from "src/lib/Create2.sol";
 
 import {SignedMath} from "openzeppelin-contracts/contracts/utils/math/SignedMath.sol";
-import "forge-std/console.sol";
 
 abstract contract PerpetualBaseRouter {
   // @notice The contract used to manage positions in perpetual
@@ -124,23 +123,10 @@ contract PerpetualLongInput is PerpetualBaseRouter {
     );
   }
 
-  // return IAccountBalance(_accountBalance).getTakerPositionSize(trader, baseToken);
-  // check position size is not equal 0
   function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) private {
-    console.logString("Here");
-    console.logAddress(msg.sender);
-    console.logAddress(TOKEN);
     int256 takerPositionSize = ACCOUNT_BALANCE.getTakerPositionSize(msg.sender, TOKEN);
-    console.logInt(takerPositionSize);
-    if (takerPositionSize == 0) {
-      console.logString("Reverting");
-      revert NoExistingPosition();
-    }
-    console.logString("X");
+    if (takerPositionSize == 0) revert NoExistingPosition();
     bool shortPosition = takerPositionSize > 0 ? true : false;
-    console.logString("X2");
-    console.logBool(shortPosition);
-    console.logInt(takerPositionSize);
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
       IClearingHouse.OpenPositionParams({
@@ -168,8 +154,8 @@ contract PerpetualLongInput is PerpetualBaseRouter {
   // 1. What us a reasonable amount of precision to reduce the function?
   // 2. What are reasonable time periods for deadlines
   //
-  // closePosition is not using the amount value and maybe we could optimize by splitting it out
-  // into a separate contract
+  // closePosition is not using the amount value and maybe we could optimize by splitting it into a
+  // separate contract
   fallback() external payable {
     (uint8 funcName, uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) =
       abi.decode(msg.data, (uint8, uint256, uint256, uint160));
