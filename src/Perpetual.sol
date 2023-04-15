@@ -41,7 +41,7 @@ abstract contract PerpetualBaseRouter {
 }
 
 // TODO: Add a router for each combination of long/short and exact input/output.
-contract PerpetualLongInput is PerpetualBaseRouter {
+contract PerpetualPositionRouter is PerpetualBaseRouter {
   using SignedMath for int256;
 
   error FunctionDoesNotExist();
@@ -117,7 +117,7 @@ contract PerpetualLongInput is PerpetualBaseRouter {
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
         deadline: type(uint256).max, // TODO: verify this is market order behavior, and do we need a
-          // separate limit router
+        // separate limit router
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -186,7 +186,7 @@ contract PerpetualRouterFactory {
   function deploy(address asset) external returns (address) {
     bytes32 salt = _salt(asset);
     address openPositionLongInput = address(
-      new PerpetualLongInput{salt: salt}(
+      new PerpetualPositionRouter{salt: salt}(
                 PERPETUAL_CLEARING_HOUSE,
                 PERPETUAL_ACCOUNT_BALANCE,
                 asset
@@ -200,7 +200,7 @@ contract PerpetualRouterFactory {
     return Create2.computeCreate2Address(
       _salt(asset),
       address(this),
-      type(PerpetualLongInput).creationCode,
+      type(PerpetualPositionRouter).creationCode,
       abi.encode(PERPETUAL_CLEARING_HOUSE, PERPETUAL_ACCOUNT_BALANCE, asset)
     );
   }

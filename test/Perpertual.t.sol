@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IVault} from "src/interface/IVault.sol";
-import {PerpetualRouterFactory, PerpetualLongInput} from "src/Perpetual.sol";
+import {PerpetualRouterFactory} from "src/Perpetual.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {AccountMarket} from "src/lib/AccountMarket.sol";
 import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
