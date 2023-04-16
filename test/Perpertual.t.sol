@@ -7,35 +7,42 @@ import {IVault} from "src/interface/IVault.sol";
 import {PerpetualRouterFactory} from "src/Perpetual.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {AccountMarket} from "src/lib/AccountMarket.sol";
+import {PerpetualContracts} from "test/PerpetualContracts.sol";
 import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
 
-contract PerpetualContracts {
-  // Optimism addresses
-
-  IClearingHouse clearingHouse = IClearingHouse(0x82ac2CE43e33683c58BE4cDc40975E73aA50f459);
-  IVault vault = IVault(0xAD7b4C162707E0B2b5f6fdDbD3f8538A5fbA0d60);
-  IAccountBalance accountBalance = IAccountBalance(0xA7f3FC32043757039d5e13d790EE43edBcBa8b7c);
-  IDelegateApproval delegateApproval = IDelegateApproval(0xfd7bB5F6844a43c5469c972640Eddfa99597a547);
-  address public immutable VETH = 0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB;
-}
-
 contract RouterFactoryTest is Test, PerpetualContracts {
-  function test_deployRouter() public {
+  function test_deployPositionRouter() public {
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
             clearingHouse,
             accountBalance,
             vault
         );
 
-    address VETHLongInputRouter = factory.deploy(VETH);
+    address VETHLongInputRouter =
+      factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
     assertEq(
       VETHLongInputRouter,
       factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
     );
   }
+
+  function test_deployDepositRouter() public {
+    PerpetualRouterFactory factory = new PerpetualRouterFactory(
+            clearingHouse,
+            accountBalance,
+            vault
+        );
+
+    address USDCDepositRouter =
+      factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
+    assertEq(
+      USDCDepositRouter,
+      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, USDC)
+    );
+  }
 }
 
-contract RouterForkTestBase is Test, PerpetualContracts {
+contract PositionRouterForkTestBase is Test, PerpetualContracts {
   PerpetualRouterFactory factory;
 
   function setUp() public {
@@ -45,7 +52,7 @@ contract RouterForkTestBase is Test, PerpetualContracts {
             accountBalance,
             vault
         );
-    factory.deploy(VETH);
+    factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
     deal(address(this), 100 ether);
     vault.depositEther{value: 10 ether}();
   }
@@ -71,7 +78,7 @@ contract RouterForkTestBase is Test, PerpetualContracts {
   }
 }
 
-contract OpenPositionLongInputFork is RouterForkTestBase {
+contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   function test_FallbackLongInput() public {
     delegateApproval.approve(
       address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),

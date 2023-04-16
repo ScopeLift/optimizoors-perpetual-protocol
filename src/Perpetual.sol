@@ -194,17 +194,24 @@ contract PerpetualRouterFactory {
   // TODO: Modify to support multiple router types
   //     or rename and have a deploy function per
   //     router.
-  function deploy(address asset) external returns (address) {
+  function deploy(RouterTypes type_, address asset) external returns (address) {
     bytes32 salt = _salt(asset);
-    address openPositionLongInput = address(
-      new PerpetualPositionRouter{salt: salt}(
-                PERPETUAL_CLEARING_HOUSE,
-                PERPETUAL_ACCOUNT_BALANCE,
-                asset
-            )
-    );
+    address router;
+    if (type_ == RouterTypes.PositionRouterType) {
+      router = address(
+        new PerpetualPositionRouter{salt: salt}(
+                    PERPETUAL_CLEARING_HOUSE,
+                    PERPETUAL_ACCOUNT_BALANCE,
+                    asset
+                )
+      );
+    } else if (type_ == RouterTypes.DepositRouterType) {
+      router = address(new DepositRouter{salt: salt}(asset, PERPETUAL_VAULT));
+    } else {
+      revert RouterTypeDoesNotExist();
+    }
     emit RouterDeployed(RouterTypes.PositionRouterType, asset);
-    return openPositionLongInput;
+    return router;
   }
 
   function computeAddress(RouterTypes type_, address asset) external view returns (address) {
@@ -224,7 +231,10 @@ contract PerpetualRouterFactory {
 
   function _computeDepositAddress(address asset) internal view returns (address) {
     return Create2.computeCreate2Address(
-      _salt(asset), address(this), type(DepositRouter).creationCode, abi.encode(PERPETUAL_VAULT)
+      _salt(asset),
+      address(this),
+      type(DepositRouter).creationCode,
+      abi.encode(asset, PERPETUAL_VAULT)
     );
   }
 

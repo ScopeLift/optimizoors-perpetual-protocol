@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IVault} from "src/interface/IVault.sol";
+import "forge-std/console.sol";
 
 contract DepositRouter {
   // @notice The token used for the router's deposits
@@ -17,8 +18,21 @@ contract DepositRouter {
     PERPETUAL_VAULT = vault;
   }
 
-  function deposit(uint256 amount) external {
+  function _deposit(uint256 amount) private {
     SafeTransferLib.safeTransferFrom(ERC20(TOKEN), msg.sender, address(this), amount);
+    ERC20(TOKEN).approve(address(PERPETUAL_VAULT), amount);
     PERPETUAL_VAULT.depositFor(msg.sender, TOKEN, amount);
+  }
+
+  // TODO: integer opitimization after talking to the protocol
+  fallback() external payable {
+    uint256 amount = abi.decode(msg.data, (uint256));
+    _deposit(amount);
+  }
+
+  receive() external payable {
+    console.logUint(msg.value);
+    console.logAddress(msg.sender);
+    PERPETUAL_VAULT.depositEtherFor{value: msg.value}(msg.sender);
   }
 }
