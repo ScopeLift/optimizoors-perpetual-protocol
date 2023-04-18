@@ -1,6 +1,7 @@
 [profile.default]
   optimizer = true
   optimizer_runs = 10_000_000
+  fs_permissions = [{ access = "read", path = "./broadcast"}]
   solc_version = "0.8.16"
   verbosity = 3
 
