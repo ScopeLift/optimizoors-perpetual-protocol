@@ -30,8 +30,6 @@ contract Benchmark is Script {
 
     vm.startBroadcast();
     vault.depositEther{value: 0.00002 ether}();
-    console.logAddress(depositRtr);
-    console.logAddress(positionRtr);
 
     (bool ok,) = payable(depositRtr).call{value: 0.00002 ether}("");
     require(ok, "Optimized ETH deposit");
