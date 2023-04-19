@@ -6,18 +6,18 @@ import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {Create2} from "src/lib/Create2.sol";
 
 abstract contract PerpetualBaseRouter {
-  // @notice The contract used to manage positions in perpetual
+  /// @notice The contract used to manage positions in perpetual
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
-  // @notice If true the position being created is a long position
-  // @notice If false the created position is a short position
+  /// @notice If true the position being created is a long position, and if false the created
+  /// position is a short position
   bool public immutable IS_BASE_TO_QUOTE;
-  // @notice If true the position is a an exact input. Similar to how it is done in uniswap
-  // @notice If false the created position is an exact output.
+  /// @notice If true the position is a an exact input. Similar to how it is done in uniswap, and if
+  /// false the created position is an exact output.
   bool public immutable IS_EXACT_INPUT;
-  // @notice The token used for the router's positions
+  /// @notice The token used for the router's positions
   address public immutable TOKEN;
 
-  // @notice A null value for a referral code
+  /// @dev A null value for a referral code
   bytes32 internal constant REFERRAL_CODE =
     0x0000000000000000000000000000000000000000000000000000000000000000;
 
@@ -48,7 +48,7 @@ contract PerpetualLongInput is PerpetualBaseRouter {
   //
   // 1. What us a reasonable amount of precision to reduce the function?
   // 2. What are reasonable time periods for deadlines
-  fallback() external payable {
+  receive() external payable {
     (uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) =
       abi.decode(msg.data, (uint256, uint256, uint160));
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
