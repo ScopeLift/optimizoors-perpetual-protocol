@@ -37,6 +37,8 @@ contract PerpetualLongInput is PerpetualBaseRouter {
     PerpetualBaseRouter(perpetual, asset, false, true)
   {}
 
+  receive() external payable {}
+
   // TODO: Greater optimization is possible but it will
   //   add more complexity. In order to avoid going
   //   down the wrong path we will wait until we can
@@ -48,7 +50,7 @@ contract PerpetualLongInput is PerpetualBaseRouter {
   //
   // 1. What us a reasonable amount of precision to reduce the function?
   // 2. What are reasonable time periods for deadlines
-  receive() external payable {
+  fallback() external payable {
     (uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) =
       abi.decode(msg.data, (uint256, uint256, uint160));
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
