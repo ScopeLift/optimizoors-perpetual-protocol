@@ -1,58 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
+import {SignedMath} from "openzeppelin-contracts/contracts/utils/math/SignedMath.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {IVault} from "src/interface/IVault.sol";
-import {DepositRouter} from "src/Deposit.sol";
+import {DepositRouter} from "src/DepositRouter.sol";
 import {Create2} from "src/lib/Create2.sol";
 
-import {SignedMath} from "openzeppelin-contracts/contracts/utils/math/SignedMath.sol";
+/// @notice A router to manage a perpetual position by opening and closing it.
+contract PerpetualPositionRouter {
+  using SignedMath for int256;
 
-abstract contract PerpetualBaseRouter {
+  error FunctionDoesNotExist();
+  error NoExistingPosition();
+
   /// @notice The contract used to manage positions in perpetual
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
-  /// @notice If true the position being created is a long position, and if false the created
-  /// position is a short position
-  bool public immutable IS_BASE_TO_QUOTE;
-  /// @notice If true the position is a an exact input. Similar to how it is done in uniswap, and if
-  /// false the created position is an exact output.
-  bool public immutable IS_EXACT_INPUT;
   /// @notice The token used for the router's positions
   address public immutable TOKEN;
+
+  /// @notice
   IAccountBalance public immutable ACCOUNT_BALANCE;
 
   /// @dev A null value for a referral code
   bytes32 internal constant REFERRAL_CODE =
     0x0000000000000000000000000000000000000000000000000000000000000000;
 
-  constructor(
-    IClearingHouse clearingHouse,
-    address asset,
-    bool isBaseToQuote,
-    bool isExactInput,
-    IAccountBalance accountBalance
-  ) {
+  constructor(IClearingHouse clearingHouse, IAccountBalance accountBalance, address asset) {
     PERPETUAL_CLEARING_HOUSE = clearingHouse;
-    IS_BASE_TO_QUOTE = isBaseToQuote;
-    IS_EXACT_INPUT = isExactInput;
-    TOKEN = asset;
     ACCOUNT_BALANCE = accountBalance;
+    TOKEN = asset;
   }
-}
 
-// TODO: Add a router for each combination of long/short and exact input/output.
-contract PerpetualPositionRouter is PerpetualBaseRouter {
-  using SignedMath for int256;
-
-  error FunctionDoesNotExist();
-  error NoExistingPosition();
-
-  constructor(IClearingHouse perpetual, IAccountBalance accountBalance, address asset)
-    PerpetualBaseRouter(perpetual, asset, false, true, accountBalance)
-  {}
-
+  // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
 
   function _openLongInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)

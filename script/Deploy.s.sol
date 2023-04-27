@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.16;
 
-import "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
 import {IVault} from "src/interface/IVault.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
@@ -17,9 +17,7 @@ contract Deploy is Script {
   address public immutable VETH = 0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB;
 
   function run() public {
-    // Commented out for now until https://github.com/crytic/slither/pull/1461 is released.
-    // vm.startBroadcast();
-
+    require(block.chainid == 10, "script can only be run on optimism");
     vm.broadcast();
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
             clearingHouse,

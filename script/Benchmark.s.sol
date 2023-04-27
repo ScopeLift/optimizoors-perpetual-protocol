@@ -1,5 +1,5 @@
-import "forge-std/Script.sol";
-import {DepositRouter} from "src/Deposit.sol";
+import {Script, stdJson} from "forge-std/Script.sol";
+import {DepositRouter} from "src/DepositRouter.sol";
 import {PerpetualRouterFactory} from "src/Perpetual.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IVault} from "src/interface/IVault.sol";
@@ -17,6 +17,7 @@ contract Benchmark is Script {
   address public immutable USDC = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
 
   function run() public {
+    require(block.chainid == 10, "script can only be run on optimism");
     string memory file = "broadcast/Deploy.s.sol/10/run-latest.json";
     string memory json = vm.readFile(file);
 

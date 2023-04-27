@@ -2,10 +2,11 @@
 pragma solidity >=0.8.0;
 
 import "forge-std/Test.sol";
-import {PerpetualContracts} from "test/PerpetualContracts.sol";
-import {PerpetualRouterFactory} from "src/Perpetual.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+
+import {PerpetualContracts} from "test/PerpetualContracts.sol";
+import {PerpetualRouterFactory} from "src/Perpetual.sol";
 
 contract DepositRouterForkTestBase is Test, PerpetualContracts {
   PerpetualRouterFactory factory;

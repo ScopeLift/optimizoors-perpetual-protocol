@@ -11,7 +11,7 @@
         "0xA7f3FC32043757039d5e13d790EE43edBcBa8b7c",
         "0xAD7b4C162707E0B2b5f6fdDbD3f8538A5fbA0d60"
       ],
-      "rpc": "https://opt-mainnet.g.alchemy.com/v2/_A7lZ2J0FrbUnvsj0wE0ZDiyHBg8C148",
+      "rpc": "",
       "transaction": {
         "type": "0x00",
         "from": "0xeac5f0d4a9a45e1f9fdd0e7e2882e9f60e301156",
@@ -29,11 +29,8 @@
       "contractName": "PerpetualRouterFactory",
       "contractAddress": "0x630567C26340Da0700E6572E0FFa72e10e002B35",
       "function": "deploy(uint8,address):(address)",
-      "arguments": [
-        "1",
-        "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"
-      ],
-      "rpc": "https://opt-mainnet.g.alchemy.com/v2/_A7lZ2J0FrbUnvsj0wE0ZDiyHBg8C148",
+      "arguments": ["1", "0x7F5c764cBc14f9669B88837ca1490cCa17c31607"],
+      "rpc": "",
       "transaction": {
         "type": "0x00",
         "from": "0xeac5f0d4a9a45e1f9fdd0e7e2882e9f60e301156",
@@ -58,11 +55,8 @@
       "contractName": "PerpetualRouterFactory",
       "contractAddress": "0x630567C26340Da0700E6572E0FFa72e10e002B35",
       "function": "deploy(uint8,address):(address)",
-      "arguments": [
-        "0",
-        "0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB"
-      ],
-      "rpc": "https://opt-mainnet.g.alchemy.com/v2/_A7lZ2J0FrbUnvsj0wE0ZDiyHBg8C148",
+      "arguments": ["0", "0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB"],
+      "rpc": "",
       "transaction": {
         "type": "0x00",
         "from": "0xeac5f0d4a9a45e1f9fdd0e7e2882e9f60e301156",
@@ -160,7 +154,7 @@
   ],
   "libraries": [],
   "pending": [],
-  "path": "/home/keating/programming/open-source/optimizoors-perpetual-protocol/broadcast/Deploy.s.sol/10/run-latest.json",
+  "path": "",
   "returns": {},
   "timestamp": 1681853983,
   "chain": 10,
