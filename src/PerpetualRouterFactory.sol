@@ -28,9 +28,6 @@ contract PerpetualRouterFactory {
     PERPETUAL_VAULT = vault;
   }
 
-  // TODO: Modify to support multiple router types
-  //     or rename and have a deploy function per
-  //     router.
   function deploy(RouterTypes type_, address asset) external returns (address) {
     bytes32 salt = _salt(asset);
     address router;
