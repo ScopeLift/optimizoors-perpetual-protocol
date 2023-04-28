@@ -19,7 +19,8 @@ contract Deploy is Script {
   function run() public {
     require(block.chainid == 10, "script can only be run on optimism");
     vm.broadcast();
-    PerpetualRouterFactory factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
+    PerpetualRouterFactory factory =
+      new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
 
     vm.broadcast();
     factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
