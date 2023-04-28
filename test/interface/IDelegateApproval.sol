@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// permalink:
+// https://optimistic.etherscan.io/address/0x0ca14d901ffe8461b8196e593083d004993916b8#code#F2#L1
 pragma solidity 0.8.16;
 pragma abicoder v2;
 

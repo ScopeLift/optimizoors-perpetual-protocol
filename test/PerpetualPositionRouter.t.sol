@@ -1,50 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
-import {IClearingHouse} from "src/interface/IClearingHouse.sol";
-import {IVault} from "src/interface/IVault.sol";
-import {PerpetualRouterFactory} from "src/Perpetual.sol";
-import {IAccountBalance} from "src/interface/IAccountBalance.sol";
+import {PerpetualRouterFactory} from "src/PerpetualRouterFactory.sol";
 import {AccountMarket} from "src/lib/AccountMarket.sol";
 import {PerpetualContracts} from "test/PerpetualContracts.sol";
-import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
-
-contract RouterFactoryTest is Test, PerpetualContracts {
-  function test_deployPositionRouter() public {
-    PerpetualRouterFactory factory = new PerpetualRouterFactory(
-            clearingHouse,
-            accountBalance,
-            vault
-        );
-
-    address VETHLongInputRouter =
-      factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
-    assertEq(
-      VETHLongInputRouter,
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    );
-  }
-
-  function test_deployDepositRouter() public {
-    PerpetualRouterFactory factory = new PerpetualRouterFactory(
-            clearingHouse,
-            accountBalance,
-            vault
-        );
-
-    address USDCDepositRouter =
-      factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
-    assertEq(
-      USDCDepositRouter,
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC)
-    );
-  }
-}
 
 contract PositionRouterForkTestBase is Test, PerpetualContracts {
   PerpetualRouterFactory factory;
+  address vethPositionRouterAddr;
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
@@ -56,6 +21,8 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
     factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
     deal(address(this), 100 ether);
     vault.depositEther{value: 10 ether}();
+    vethPositionRouterAddr =
+      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH));
   }
 
   function _closePositionHelper(
@@ -64,16 +31,12 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
     uint256 oppositeAmountBound,
     uint256 sqrtPriceLimitX96
   ) internal {
-    delegateApproval.approve(
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),
-      1
-    ); //
-    (bool ok,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(openFunc, amount, oppositeAmountBound, sqrtPriceLimitX96));
-    (bool okTwo,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(5, 0, oppositeAmountBound, sqrtPriceLimitX96));
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(
+      abi.encode(openFunc, amount, oppositeAmountBound, sqrtPriceLimitX96)
+    );
+    (bool okTwo,) =
+      payable(vethPositionRouterAddr).call(abi.encode(5, 0, oppositeAmountBound, sqrtPriceLimitX96));
     assertTrue(ok);
     assertTrue(okTwo);
   }
@@ -81,13 +44,8 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
 
 contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   function test_FallbackLongInput() public {
-    delegateApproval.approve(
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),
-      1
-    ); //
-    (bool ok,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(4, 1 ether, 0, 0));
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(4, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     assertEq(info.takerOpenNotional, -1 ether);
@@ -95,13 +53,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   }
 
   function test_FallbackLongOutput() public {
-    delegateApproval.approve(
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),
-      1
-    ); //
-    (bool ok,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(3, 1 ether, 0, 0));
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(3, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
     assertTrue(ok);
@@ -110,13 +63,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   }
 
   function test_FallbackShortInput() public {
-    delegateApproval.approve(
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),
-      1
-    ); //
-    (bool ok,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(2, 1 ether, 0, 0));
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(2, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     assertEq(info.takerOpenNotional, 1_852_924_032_181_202_909_050);
@@ -124,13 +72,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   }
 
   function test_FallbackShortOutput() public {
-    delegateApproval.approve(
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)),
-      1
-    ); //
-    (bool ok,) = payable(
-      factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH)
-    ).call(abi.encode(1, 1 ether, 0, 0));
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(1, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     assertEq(info.takerOpenNotional, 1 ether);

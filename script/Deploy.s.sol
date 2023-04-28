@@ -6,7 +6,7 @@ import {Script} from "forge-std/Script.sol";
 import {IVault} from "src/interface/IVault.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
-import {PerpetualRouterFactory} from "src/Perpetual.sol";
+import {PerpetualRouterFactory} from "src/PerpetualRouterFactory.sol";
 
 contract Deploy is Script {
   IClearingHouse clearingHouse = IClearingHouse(0x82ac2CE43e33683c58BE4cDc40975E73aA50f459);

@@ -22,6 +22,7 @@
     "src/lib/AccountMarket.sol",
     "src/interface/IClearingHouse.sol",
     "src/interface/IVault.sol",
+    "src/test/interface/IDelegateApproval.sol",
   ]
   int_types = "long"
   line_length = 100
