@@ -34,10 +34,8 @@ contract PerpetualRouterFactory {
     if (type_ == RouterTypes.PositionRouterType) {
       router = address(
         new PerpetualPositionRouter{salt: salt}(
-                    PERPETUAL_CLEARING_HOUSE,
-                    PERPETUAL_ACCOUNT_BALANCE,
-                    asset
-                )
+          PERPETUAL_CLEARING_HOUSE, PERPETUAL_ACCOUNT_BALANCE, asset
+        )
       );
     } else if (type_ == RouterTypes.DepositRouterType) {
       router = address(new DepositRouter{salt: salt}(asset, PERPETUAL_VAULT));

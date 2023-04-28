@@ -13,11 +13,7 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
 
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
-    factory = new PerpetualRouterFactory(
-            clearingHouse,
-            accountBalance,
-            vault
-        );
+    factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
     factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
     deal(address(this), 100 ether);
     vault.depositEther{value: 10 ether}();

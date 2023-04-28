@@ -8,11 +8,7 @@ import {PerpetualContracts} from "test/PerpetualContracts.sol";
 
 contract RouterFactoryTest is Test, PerpetualContracts {
   function test_deployPositionRouter() public {
-    PerpetualRouterFactory factory = new PerpetualRouterFactory(
-            clearingHouse,
-            accountBalance,
-            vault
-        );
+    PerpetualRouterFactory factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
 
     address VETHLongInputRouter =
       factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
@@ -23,11 +19,7 @@ contract RouterFactoryTest is Test, PerpetualContracts {
   }
 
   function test_deployDepositRouter() public {
-    PerpetualRouterFactory factory = new PerpetualRouterFactory(
-            clearingHouse,
-            accountBalance,
-            vault
-        );
+    PerpetualRouterFactory factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
 
     address USDCDepositRouter =
       factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
