@@ -37,7 +37,7 @@ contract PerpetualPositionRouter {
   receive() external payable {}
 
   function _openLongInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    private
+    internal
   {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
@@ -55,7 +55,7 @@ contract PerpetualPositionRouter {
   }
 
   function _openLongOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    private
+    internal
   {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
@@ -73,7 +73,7 @@ contract PerpetualPositionRouter {
   }
 
   function _openShortInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    private
+    internal
   {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
@@ -91,7 +91,7 @@ contract PerpetualPositionRouter {
   }
 
   function _openShortOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    private
+    internal
   {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
@@ -109,7 +109,7 @@ contract PerpetualPositionRouter {
     );
   }
 
-  function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) private {
+  function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) internal {
     int256 takerPositionSize = ACCOUNT_BALANCE.getTakerPositionSize(msg.sender, TOKEN);
     if (takerPositionSize == 0) revert NoExistingPosition();
     bool shortPosition = takerPositionSize > 0 ? true : false;
