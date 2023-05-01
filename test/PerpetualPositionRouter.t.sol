@@ -41,10 +41,15 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
 contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   function test_FallbackLongInput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(4, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
+
+	// Long position is represented as a negative number
     assertEq(info.takerOpenNotional, -1 ether);
+	// Meant to prevent regression number was sourced
+	// from running test in a working state.
     assertEq(info.takerPositionSize, 538_599_759_293_451);
   }
 
@@ -54,7 +59,11 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
     assertTrue(ok);
+
+	// Long position is represented as a negative number
     assertEq(info.takerOpenNotional, -1_856_697_038_719_929_142_024);
+	// Meant to prevent regression number was sourced
+	// from running test in a working state.
     assertEq(info.takerPositionSize, 1 ether);
   }
 
@@ -63,6 +72,9 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(2, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
+	// Short position is represented as a positive number
+	// Meant to prevent regression number was sourced
+	// from running test in a working state.
     assertEq(info.takerOpenNotional, 1_852_924_032_181_202_909_050);
     assertEq(info.takerPositionSize, -1 ether);
   }
@@ -72,7 +84,10 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(1, 1 ether, 0, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
+	// Short position is represented as a positive number
     assertEq(info.takerOpenNotional, 1 ether);
+	// Meant to prevent regression number was sourced
+	// from running test in a working state.
     assertEq(info.takerPositionSize, -539_678_586_420_661);
   }
 
