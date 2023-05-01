@@ -1,4 +1,5 @@
 [profile.default]
+  fs_permissions = [{ access = "read", path = "./broadcast" }]
   optimizer = true
   optimizer_runs = 10_000_000
   solc_version = "0.8.16"
@@ -16,6 +17,13 @@
 
 [fmt]
   bracket_spacing = false
+  ignore = [
+    "src/interface/IAccountBalance.sol",
+    "src/lib/AccountMarket.sol",
+    "src/interface/IClearingHouse.sol",
+    "src/interface/IVault.sol",
+    "src/test/interface/IDelegateApproval.sol",
+  ]
   int_types = "long"
   line_length = 100
   multiline_func_header = "attributes_first"
@@ -24,3 +32,9 @@
   single_line_statement_blocks = "single"
   tab_width = 2
   wrap_comments = true
+
+# ===============================
+# ======== RPC Endpoints ========
+# ===============================
+[rpc_endpoints]
+  optimism = "${OPTIMISM_RPC_URL}"
