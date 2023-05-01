@@ -48,8 +48,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
     // Long position is represented as a negative number
     assertEq(info.takerOpenNotional, -1 ether);
-    // Meant to prevent regression number was sourced
-    // from running test in a working state.
+    // Meant to prevent regression. Number was sourced
+    // from running this test in a working state.
     assertEq(info.takerPositionSize, 538_599_759_293_451);
   }
 
@@ -62,8 +62,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
     // Long position is represented as a negative number
     assertEq(info.takerOpenNotional, -1_856_697_038_719_929_142_024);
-    // Meant to prevent regression number was sourced
-    // from running test in a working state.
+    // Meant to prevent a regression. Number was sourced
+    // from running this test in a working state.
     assertEq(info.takerPositionSize, 1 ether);
   }
 
@@ -73,8 +73,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     // Short position is represented as a positive number
-    // Meant to prevent regression number was sourced
-    // from running test in a working state.
+    // Meant to prevent a regression. Number was sourced
+    // from running this test in a working state.
     assertEq(info.takerOpenNotional, 1_852_924_032_181_202_909_050);
     assertEq(info.takerPositionSize, -1 ether);
   }
