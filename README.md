@@ -11,7 +11,7 @@
 
 Perpetual Optimizoors compresses calldata for Perpetual Protocol allowing
 users to experience significant gas savings. This work was funded by an Ethereum Foundation
-[grant](https://blog.ethereum.org/2023/02/14/layer-2-grants-roundup). Read our [blog post](https://www.scopelift.co/blog/calldata-optimizooooors) to learn more.
+[grant](https://blog.ethereum.org/2023/02/14/layer-2-grants-roundup). Read our [blog post](https://www.scopelift.co/blog/calldata-optimizooooors) to learn more about how we optimize protocols on L2.
 
 ## Development
 
