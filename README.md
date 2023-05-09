@@ -38,6 +38,17 @@ forge build # build the projects smart contracts
 To learn more about what commands can be run using forge check out the
 [foundry book](https://book.getfoundry.sh/reference/forge/forge).
 
+### How it works
+
+We have a router factory which deploys calldata optimized routers for specific functionality within
+Perpetual Protocol. Currently, we have two types of routers. One that has the functionality for opening and closing
+positions which we call the `PositionRouter`, and another to deposit ERC20 or Ethereum into a Perpetual vault which
+we call the `DepositRouter`.
+
+There will be one `PositionRouter` contract per position token. For example if a user is opening a vDOGE
+position they will have to call the vDOGE position router. The same is also true for a `DepositRouter`. There
+will a `DepositRouter` contract per token.
+
 ## License
 
 Umbra is available under the [MIT](LICENSE.txt) license.
