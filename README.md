@@ -4,8 +4,6 @@
   <b>This repo does not contain production ready code and is still a work in progress.</b>
 </p>
 
----
-
 - [About](#about)
 - [Development](#development)
   - [Instructions](#instructions)
