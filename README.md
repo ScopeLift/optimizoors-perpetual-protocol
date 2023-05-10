@@ -11,32 +11,26 @@
 
 ## About
 
-Perpetual Optimizoors compresses calldata for Perpetual Protocol allowing
-users to experience significant gas savings. This work was funded by an Ethereum Foundation
+Perpetual Optimizoors provides a calldata-optimized router for [Perpetual Protocol](https://perp.com/),
+providing significant gas savings to users. This work was funded by an Ethereum Foundation
 [grant](https://blog.ethereum.org/2023/02/14/layer-2-grants-roundup). Read our [blog post](https://www.scopelift.co/blog/calldata-optimizooooors) to learn more about how we optimize protocols on L2.
 
 ## Development
-
-This repository requires [foundry](https://github.com/foundry-rs/foundry) for smart contract development.
 
 ### Instructions
 
 To get started, clone this repo, then follow the below instructions:
 
-```
+```sh
 # run these commands from the workspace root!
 cp .env.example .env
-curl -L https://foundry.paradigm.xyz | bash # install foundryup binary
-foundryup # install Foundry
 
-# Example commands using forge
+# Run tests
+forge test
 
-forge test # runs tests for the smart contracts
-forge build # build the projects smart contracts
+# Build smart contracts
+forge build
 ```
-
-To learn more about what commands can be run using forge check out the
-[foundry book](https://book.getfoundry.sh/reference/forge/forge).
 
 ### How it works
 
