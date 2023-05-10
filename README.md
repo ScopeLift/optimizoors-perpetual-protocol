@@ -45,6 +45,6 @@ will a `DepositRouter` contract per token.
 
 ## License
 
-Umbra is available under the [MIT](LICENSE.txt) license.
+This project is available under the [MIT](LICENSE.txt) license.
 
 Copyright (c) 2023 ScopeLift
