@@ -39,8 +39,8 @@ Perpetual Protocol. Currently, we have two types of routers. One that has the fu
 positions which we call the `PositionRouter`, and another to deposit ERC20 or Ethereum into a Perpetual vault which
 we call the `DepositRouter`.
 
-There will be one `PositionRouter` contract per position token. For example if a user is opening a vDOGE
-position they will have to call the vDOGE position router. The same is also true for a `DepositRouter`. There
+There will be one `PositionRouter` contract per position token. For example if a user is opening a vETH
+position they will have to call the vETH position router. The same is also true for a `DepositRouter`. There
 will a `DepositRouter` contract per token.
 
 ## License
