@@ -40,11 +40,6 @@ contract PerpetualPositionRouter {
     return (uint168(funcName) << 160) | uint168(sqrtPriceLimitX96);
   }
 
-  function _extractFuncName(uint168 args) internal pure returns (uint8) {
-    uint168 firstEightBitMask = ((1 << 8) - 1) << 160;
-    return uint8((args & firstEightBitMask) >> 160);
-  }
-
   function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
     uint168 mask = (1 << 160) - 1;
 
