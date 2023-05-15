@@ -14,16 +14,17 @@ contract PerpetualPositionRouter {
   error FunctionDoesNotExist();
   error NoExistingPosition();
 
-  /// @notice The contract used to manage positions in perpetual
+  /// @notice The contract used to manage positions in perpetual.
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
 
-  /// @notice The token used for the router's positions
+  /// @notice The token used for the router's positions.
   address public immutable TOKEN;
 
-  /// @notice The perpetual contract that manages a users account balance
+  /// @notice The perpetual contract that manages a users account balance.
   IAccountBalance public immutable ACCOUNT_BALANCE;
 
-  /// @dev A null value for a referral code
+  /// @dev The default value for a referral code used when
+  /// opening a position.
   bytes32 internal constant REFERRAL_CODE =
     0x0000000000000000000000000000000000000000000000000000000000000000;
 

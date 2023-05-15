@@ -6,12 +6,12 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 import {IVault} from "src/interface/IVault.sol";
 
-/// @notice A router for depositing funds into the perpetual vault
+/// @notice A router for depositing funds into the perpetual vault.
 contract DepositRouter {
-  /// @notice The token used for the router's deposits
+  /// @notice The token that is being deposited into the router.
   address public immutable TOKEN;
 
-  /// @notice The contract for the perpetual vault to accept deposits
+  /// @notice The contract for the perpetual vault where the deposits are sent.
   IVault public immutable PERPETUAL_VAULT;
 
   constructor(address token, IVault vault) {
@@ -19,7 +19,7 @@ contract DepositRouter {
     PERPETUAL_VAULT = vault;
   }
 
-  function _deposit(uint256 amount) private {
+  function _deposit(uint256 amount) internal {
     SafeTransferLib.safeTransferFrom(ERC20(TOKEN), msg.sender, address(this), amount);
     ERC20(TOKEN).approve(address(PERPETUAL_VAULT), amount);
     PERPETUAL_VAULT.depositFor(msg.sender, TOKEN, amount);

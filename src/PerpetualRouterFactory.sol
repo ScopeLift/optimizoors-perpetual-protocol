@@ -8,6 +8,9 @@ import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IVault} from "src/interface/IVault.sol";
 
+/// @notice A factory for deploying an optimized router for Perpetual protocol. A
+/// router will require an asset and wrap some piece of functionality of Perpetual
+/// protocol.
 contract PerpetualRouterFactory {
   error RouterTypeDoesNotExist();
 
@@ -16,8 +19,13 @@ contract PerpetualRouterFactory {
     DepositRouterType
   }
 
+  /// @notice The contract used to manage positions in perpetual.
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
+
+  /// @notice The perpetual contract that manages a users account balance.
   IAccountBalance public immutable PERPETUAL_ACCOUNT_BALANCE;
+
+  /// @notice The contract for the perpetual vault where the deposits are sent.
   IVault public immutable PERPETUAL_VAULT;
 
   event RouterDeployed(RouterTypes indexed routerType, address indexed asset);
@@ -28,6 +36,11 @@ contract PerpetualRouterFactory {
     PERPETUAL_VAULT = vault;
   }
 
+  /// @notice Creates a contract for a given asset and router type, and
+  /// returns the address for the deployed contract.
+  /// @dev This function will only revert with RouterTypeDoesNotExist if a new
+  /// router is added and the case has not been handled yet. It should never
+  /// revert in production.
   function deploy(RouterTypes type_, address asset) external returns (address) {
     bytes32 salt = _salt(asset);
     address router;
@@ -46,6 +59,12 @@ contract PerpetualRouterFactory {
     return router;
   }
 
+  /// @notice Returns the address for a router of a given asset and router type.
+  /// This function will still return an address even if the router has not
+  /// been deployed.
+  /// @dev This function will only revert with RouterTypeDoesNotExist if a new
+  /// router is added and the case has not been handled yet. It should never
+  /// revert in production.
   function computeAddress(RouterTypes type_, address asset) external view returns (address) {
     if (type_ == RouterTypes.PositionRouterType) return _computePositionAddress(asset);
     else if (type_ == RouterTypes.DepositRouterType) return _computeDepositAddress(asset);
