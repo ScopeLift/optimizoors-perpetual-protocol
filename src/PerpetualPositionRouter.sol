@@ -36,8 +36,8 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
 
-  function combineArgs(uint8 funcName, uint160 sqrtPriceLimitX96) external pure returns (uint168) {
-    return (uint168(funcName) << 160) | uint168(sqrtPriceLimitX96);
+  function combineArgs(uint8 funcId, uint160 sqrtPriceLimitX96) external pure returns (uint168) {
+    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
   }
 
   function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
@@ -112,7 +112,6 @@ contract PerpetualPositionRouter {
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
         deadline: type(uint256).max, // TODO: verify this is market order behavior, and do we need a
-        // separate limit router
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -138,27 +137,25 @@ contract PerpetualPositionRouter {
     );
   }
 
-  // TODO: Greater optimization is possible but it will
-  //   add more complexity. In order to avoid going
-  //   down the wrong path we will wait until we can
-  //   talk to the projects.
+  // TODO: Greater optimization is possible but it will add more complexity.
+  // In order to avoid going down the wrong path we will wait until we can talk
+  // to the projects.
   //
   //
   //
-  // Going to push on the integer optimization as we figure out the pros and cons
+  // Going to push on the integer optimization as we figure out the pros and
+  // cons.
   //
   // 1. What us a reasonable amount of precision to reduce the function?
   // 2. What are reasonable time periods for deadlines
   fallback() external payable {
-    // The first 11 bytes are padding.
-    // The 12th byte will contain the function name
-    // which we will use to pick the correct decoding
-    // strategy
-    uint8 funcName = uint8(bytes1(msg.data[11:12]));
+    // The first 11 bytes are padding. The 12th byte will contain the function
+    // name which we will use to pick the correct decoding strategy
+    uint8 funcId = uint8(bytes1(msg.data[11:12]));
     uint168 combinedArgs;
     uint256 amount;
     uint256 oppositeAmountBound;
-    if (funcName != 5) {
+    if (funcId != 5) {
       (combinedArgs, amount, oppositeAmountBound) =
         abi.decode(msg.data, (uint168, uint256, uint256));
     } else {
@@ -166,11 +163,11 @@ contract PerpetualPositionRouter {
     }
     uint160 sqrtPriceLimitX96 = _extractSqrtPriceLimitX96(combinedArgs);
 
-    if (funcName == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96);
+    if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96);
     else revert FunctionDoesNotExist();
   }
 }
