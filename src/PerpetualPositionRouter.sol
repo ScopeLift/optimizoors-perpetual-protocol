@@ -36,7 +36,7 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
 
-  function combineArgs(uint8 funcId, uint160 sqrtPriceLimitX96) external pure returns (uint168) {
+  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) external pure returns (uint168) {
     return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
   }
 
