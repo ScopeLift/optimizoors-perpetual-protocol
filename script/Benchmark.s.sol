@@ -8,16 +8,10 @@ import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IVault} from "src/interface/IVault.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IDelegateApproval} from "test/interface/IDelegateApproval.sol";
+import {PerpetualContracts} from "test/PerpetualContracts.sol";
 
-contract Benchmark is Script {
+contract Benchmark is Script, PerpetualContracts {
   using stdJson for string;
-
-  IVault vault = IVault(0xAD7b4C162707E0B2b5f6fdDbD3f8538A5fbA0d60);
-  IClearingHouse clearingHouse = IClearingHouse(0x82ac2CE43e33683c58BE4cDc40975E73aA50f459);
-
-  IDelegateApproval delegateApproval = IDelegateApproval(0xfd7bB5F6844a43c5469c972640Eddfa99597a547);
-  address public immutable VETH = 0x8C835DFaA34e2AE61775e80EE29E2c724c6AE2BB;
-  address public immutable USDC = 0x7F5c764cBc14f9669B88837ca1490cCa17c31607;
 
   function run() public {
     require(block.chainid == 10, "script can only be run on optimism");
