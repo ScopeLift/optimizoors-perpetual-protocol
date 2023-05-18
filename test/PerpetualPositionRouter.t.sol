@@ -7,10 +7,6 @@ import {PerpetualRouterFactory} from "src/PerpetualRouterFactory.sol";
 import {AccountMarket} from "src/lib/AccountMarket.sol";
 import {PerpetualContracts} from "test/PerpetualContracts.sol";
 
-interface IPositionRouter {
-  function encodeArgs(uint8, uint160) external pure returns (uint168);
-}
-
 contract PositionRouterForkTestBase is Test, PerpetualContracts {
   PerpetualRouterFactory factory;
   address vethPositionRouterAddr;
@@ -32,24 +28,26 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
     uint160 sqrtPriceLimitX96
   ) internal {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 openCombinedArgs =
-      IPositionRouter(vethPositionRouterAddr).encodeArgs(openFunc, sqrtPriceLimitX96);
+    uint168 openCombinedArgs = _encodeArgs(openFunc, sqrtPriceLimitX96);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encode(openCombinedArgs, amount, oppositeAmountBound)
     );
-    uint168 closeCombinedArgs =
-      IPositionRouter(vethPositionRouterAddr).encodeArgs(5, sqrtPriceLimitX96);
+    uint168 closeCombinedArgs = _encodeArgs(5, sqrtPriceLimitX96);
     (bool okTwo,) =
       payable(vethPositionRouterAddr).call(abi.encode(closeCombinedArgs, 0, oppositeAmountBound));
     assertTrue(ok);
     assertTrue(okTwo);
+  }
+
+  function _encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
+    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
   }
 }
 
 contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   function test_FallbackLongInput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = IPositionRouter(vethPositionRouterAddr).encodeArgs(4, 0);
+    uint168 combinedArgs = _encodeArgs(4, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -63,7 +61,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackLongOutput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = IPositionRouter(vethPositionRouterAddr).encodeArgs(3, 0);
+    uint168 combinedArgs = _encodeArgs(3, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
@@ -78,7 +76,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackShortInput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = IPositionRouter(vethPositionRouterAddr).encodeArgs(2, 0);
+    uint168 combinedArgs = _encodeArgs(2, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -91,7 +89,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackShortOutput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = IPositionRouter(vethPositionRouterAddr).encodeArgs(1, 0);
+    uint168 combinedArgs = _encodeArgs(1, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
