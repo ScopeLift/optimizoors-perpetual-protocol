@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.0;
 
 import {SignedMath} from "openzeppelin-contracts/contracts/utils/math/SignedMath.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
@@ -35,6 +35,12 @@ contract PerpetualPositionRouter {
 
   // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
+
+  function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
+    uint168 mask = (1 << 160) - 1;
+
+    return uint160(args & mask);
+  }
 
   function _openLongInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
@@ -102,7 +108,6 @@ contract PerpetualPositionRouter {
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
         deadline: type(uint256).max, // TODO: verify this is market order behavior, and do we need a
-        // separate limit router
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -128,28 +133,37 @@ contract PerpetualPositionRouter {
     );
   }
 
-  // TODO: Greater optimization is possible but it will
-  //   add more complexity. In order to avoid going
-  //   down the wrong path we will wait until we can
-  //   talk to the projects.
+  // TODO: Greater optimization is possible but it will add more complexity.
+  // In order to avoid going down the wrong path we will wait until we can talk
+  // to the projects.
   //
   //
   //
-  // Going to push on the integer optimization as we figure out the pros and cons
+  // Going to push on the integer optimization as we figure out the pros and
+  // cons.
   //
   // 1. What us a reasonable amount of precision to reduce the function?
   // 2. What are reasonable time periods for deadlines
-  //
-  // closePosition is not using the amount value and maybe we could optimize by splitting it into a
-  // separate contract
   fallback() external payable {
-    (uint8 funcName, uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) =
-      abi.decode(msg.data, (uint8, uint256, uint256, uint160));
-    if (funcName == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcName == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96);
+    // The first 11 bytes are padding. The 12th byte will contain the function
+    // name which we will use to pick the correct decoding strategy
+    uint8 funcId = uint8(bytes1(msg.data[11:12]));
+    uint168 combinedArgs;
+    uint256 amount;
+    uint256 oppositeAmountBound;
+    if (funcId != 5) {
+      (combinedArgs, amount, oppositeAmountBound) =
+        abi.decode(msg.data, (uint168, uint256, uint256));
+    } else {
+      (combinedArgs, oppositeAmountBound) = abi.decode(msg.data, (uint168, uint256));
+    }
+    uint160 sqrtPriceLimitX96 = _extractSqrtPriceLimitX96(combinedArgs);
+
+    if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
+    else if (funcId == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96);
     else revert FunctionDoesNotExist();
   }
 }

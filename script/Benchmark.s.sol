@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
 import {Script, stdJson} from "forge-std/Script.sol";
 import {DepositRouter} from "src/DepositRouter.sol";
 import {PerpetualRouterFactory} from "src/PerpetualRouterFactory.sol";

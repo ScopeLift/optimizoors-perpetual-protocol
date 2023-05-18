@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.16;
+pragma solidity ^0.8.0;
 
 import {Script} from "forge-std/Script.sol";
 import {IVault} from "src/interface/IVault.sol";

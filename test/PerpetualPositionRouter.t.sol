@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 
@@ -21,28 +21,34 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
       address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH));
   }
 
-  function _closePositionHelper(
+  function closePosititionHelper(
     uint8 openFunc,
     uint256 amount,
     uint256 oppositeAmountBound,
-    uint256 sqrtPriceLimitX96
+    uint160 sqrtPriceLimitX96
   ) internal {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    uint168 openCombinedArgs = encodeArgs(openFunc, sqrtPriceLimitX96);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encode(openFunc, amount, oppositeAmountBound, sqrtPriceLimitX96)
+      abi.encode(openCombinedArgs, amount, oppositeAmountBound)
     );
+    uint168 closeCombinedArgs = encodeArgs(5, sqrtPriceLimitX96);
     (bool okTwo,) =
-      payable(vethPositionRouterAddr).call(abi.encode(5, 0, oppositeAmountBound, sqrtPriceLimitX96));
+      payable(vethPositionRouterAddr).call(abi.encode(closeCombinedArgs, 0, oppositeAmountBound));
     assertTrue(ok);
     assertTrue(okTwo);
+  }
+
+  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
+    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
   }
 }
 
 contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   function test_FallbackLongInput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-
-    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(4, 1 ether, 0, 0));
+    uint168 combinedArgs = encodeArgs(4, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
 
@@ -55,7 +61,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackLongOutput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(3, 1 ether, 0, 0));
+    uint168 combinedArgs = encodeArgs(3, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
     assertTrue(ok);
@@ -69,7 +76,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackShortInput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(2, 1 ether, 0, 0));
+    uint168 combinedArgs = encodeArgs(2, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     // Short position is represented as a positive number
@@ -81,7 +89,8 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
 
   function test_FallbackShortOutput() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(1, 1 ether, 0, 0));
+    uint168 combinedArgs = encodeArgs(1, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
     // Short position is represented as a positive number
@@ -92,14 +101,14 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   }
 
   function test_FallbackClosePositionLong() public {
-    _closePositionHelper(4, 1 ether, 0, 0);
+    closePosititionHelper(4, 1 ether, 0, 0);
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
   }
 
   function test_FallbackClosePositionShortInput() public {
-    _closePositionHelper(2, 5 ether, 0, 0);
+    closePosititionHelper(2, 5 ether, 0, 0);
 
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
@@ -107,14 +116,14 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
   }
 
   function test_FallbackClosePositionShortOutput() public {
-    _closePositionHelper(1, 1 ether, 0, 0);
+    closePosititionHelper(1, 1 ether, 0, 0);
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
   }
 
   function test_FallbackClosePositionLongOutput() public {
-    _closePositionHelper(3, 1 ether, 0, 0);
+    closePosititionHelper(3, 1 ether, 0, 0);
 
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
