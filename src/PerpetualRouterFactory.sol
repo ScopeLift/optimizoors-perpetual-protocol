@@ -43,8 +43,8 @@ contract PerpetualRouterFactory {
     PERPETUAL_VAULT = vault;
   }
 
-  /// @notice Creates a contract for a given asset and router type, and returns the address for the
-  /// deployed contract.
+  /// @notice Creates a contract for a given `asset` and router `type_`, and returns the address for
+  /// the deployed contract.
   /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new router is added and
   /// the case has not been handled yet. It should never revert in production.
   /// @param type_ The type of router to deploy.
@@ -67,8 +67,8 @@ contract PerpetualRouterFactory {
     return router;
   }
 
-  /// @notice Returns the address for a router of a given asset and router type. This function will
-  /// still return an address even if the router has not been deployed.
+  /// @notice Returns the address for a router of a given `asset` and router `type_`. This function
+  /// will still return an address even if the router has not been deployed.
   /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new router is added and
   /// the case has not been handled yet. It should never revert in production.
   function computeAddress(RouterTypes type_, address asset) external view returns (address) {
@@ -77,7 +77,7 @@ contract PerpetualRouterFactory {
     else revert RouterTypeDoesNotExist();
   }
 
-  /// @dev Computes the address for a position router of a given asset.
+  /// @dev Computes the address for a position router of a given `asset`.
   /// @param asset The token the router uses to open and close positions.
   function _computePositionAddress(address asset) internal view returns (address) {
     return Create2.computeCreate2Address(
@@ -88,7 +88,7 @@ contract PerpetualRouterFactory {
     );
   }
 
-  /// @dev Computes the address for a deposit router of a given asset.
+  /// @dev Computes the address for a deposit router of a given `asset`.
   /// @param asset The token the router uses to manage deposits.
   function _computeDepositAddress(address asset) internal view returns (address) {
     return Create2.computeCreate2Address(
@@ -99,7 +99,7 @@ contract PerpetualRouterFactory {
     );
   }
 
-  /// @dev Creates salt value used when creating a contract using `CREATE2`.
+  /// @dev Creates salt value used when creating a contract using `CREATE2` for the given `asset`.
   function _salt(address asset) internal pure returns (bytes32) {
     return bytes32(uint256(uint160(asset)));
   }

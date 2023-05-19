@@ -74,7 +74,7 @@ contract PerpetualPositionRouter {
 
   /// @dev Used to open a long position specifying the output amount of the position.
   /// @param amount The output amount of the position.
-  /// @param oppositeAmountBound The upper bound on the input quote token (vUSDC).
+  /// @param oppositeAmountBound The upper bound on the input quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
   function _openLongOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
@@ -96,7 +96,7 @@ contract PerpetualPositionRouter {
 
   /// @dev Used to open a short position specifying the input amount of the position.
   /// @param amount The input amount of the position.
-  /// @param oppositeAmountBound The lower bound on the output quote token (vUSDC).
+  /// @param oppositeAmountBound The lower bound on the output quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
   function _openShortInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
@@ -140,8 +140,8 @@ contract PerpetualPositionRouter {
 
   /// @dev Closes an open position for the router's token.
   /// @param oppositeAmountBound If the position being closed in a long position then this will be
-  /// the upper bound on the input quote token (vUSDC). If the position is a short position then
-  /// this will be the lower bound on the output quote token (vUSDC).
+  /// the upper bound on the input quote token (e.g. vUSDC). If the position is a short position then
+  /// this will be the lower bound on the output quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
   function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) internal {
     int256 takerPositionSize = ACCOUNT_BALANCE.getTakerPositionSize(msg.sender, TOKEN);
