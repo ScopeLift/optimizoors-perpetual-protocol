@@ -17,7 +17,7 @@ contract PerpetualRouterFactory {
   /// that a valid router is passed into a function.
   error RouterTypeDoesNotExist();
 
-  /// @dev different types of routers that can be deployed by the factory.
+  /// @dev The different types of routers that can be deployed by the factory.
   enum RouterTypes {
     PositionRouterType,
     DepositRouterType

@@ -7,7 +7,7 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 
-/// @notice A router to manage a perpetual position by opening and closing it.
+/// @notice A router to manage a Perpetual position by opening and closing it.
 contract PerpetualPositionRouter {
   using SignedMath for int256;
 
@@ -18,13 +18,13 @@ contract PerpetualPositionRouter {
   /// not exist.
   error NoExistingPosition();
 
-  /// @notice The contract used to manage positions in perpetual.
+  /// @notice The contract used to manage positions in Perpetual.
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
 
   /// @notice The token used for the router's positions.
   address public immutable TOKEN;
 
-  /// @notice The perpetual contract that manages a users account balance.
+  /// @notice The Perpetual contract that manages a users account balance.
   IAccountBalance public immutable ACCOUNT_BALANCE;
 
   /// @dev The default value for a referral code used when opening a position.
@@ -33,14 +33,14 @@ contract PerpetualPositionRouter {
 
   /// @param clearingHouse Address of the Perpetual clearing house contract.
   /// @param accountBalance Address of the Perpetual account balance contract.
-  /// @param asset Address of the token used for the perpetual position.
+  /// @param asset Address of the token used for the Perpetual position.
   constructor(IClearingHouse clearingHouse, IAccountBalance accountBalance, address asset) {
     PERPETUAL_CLEARING_HOUSE = clearingHouse;
     ACCOUNT_BALANCE = accountBalance;
     TOKEN = asset;
   }
 
-  // TODO: Should we deposit eth into the perpetual vault?
+  // TODO: Should we deposit eth into the Perpetual vault?
   receive() external payable {}
 
   /// @dev Returns the `sqrtPriceLimitX96` from a `uint168`.
