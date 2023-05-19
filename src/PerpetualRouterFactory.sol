@@ -8,13 +8,12 @@ import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {IVault} from "src/interface/IVault.sol";
 
-/// @notice A factory for deploying an optimized router for Perpetual protocol. A
-/// router will require an asset and wrap some piece of functionality of Perpetual
-/// protocol.
+/// @notice A factory for deploying an optimized router for Perpetual protocol. A router will
+/// require an asset and wrap some piece of functionality of Perpetual protocol.
 contract PerpetualRouterFactory {
-  /// @dev Thrown when a function tries to use a router that does not exist.
-  /// This error should not be thrown in production as we use an enum to ensure
-  /// that a valid router is passed into a function.
+  /// @dev Thrown when a function tries to use a router that does not exist. This error should not
+  /// be thrown in production as we use an enum to ensure that a valid router is passed into a
+  /// function.
   error RouterTypeDoesNotExist();
 
   /// @dev The different types of routers that can be deployed by the factory.
@@ -44,11 +43,10 @@ contract PerpetualRouterFactory {
     PERPETUAL_VAULT = vault;
   }
 
-  /// @notice Creates a contract for a given asset and router type, and
-  /// returns the address for the deployed contract.
-  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new
-  /// router is added and the case has not been handled yet. It should never
-  /// revert in production.
+  /// @notice Creates a contract for a given asset and router type, and returns the address for the
+  /// deployed contract.
+  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new router is added and
+  /// the case has not been handled yet. It should never revert in production.
   /// @param type_ The type of router to deploy.
   /// @param asset The token the router uses to manage deposits and positions.
   function deploy(RouterTypes type_, address asset) external returns (address) {
@@ -69,12 +67,10 @@ contract PerpetualRouterFactory {
     return router;
   }
 
-  /// @notice Returns the address for a router of a given asset and router type.
-  /// This function will still return an address even if the router has not
-  /// been deployed.
-  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new
-  /// router is added and the case has not been handled yet. It should never
-  /// revert in production.
+  /// @notice Returns the address for a router of a given asset and router type. This function will
+  /// still return an address even if the router has not been deployed.
+  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new router is added and
+  /// the case has not been handled yet. It should never revert in production.
   function computeAddress(RouterTypes type_, address asset) external view returns (address) {
     if (type_ == RouterTypes.PositionRouterType) return _computePositionAddress(asset);
     else if (type_ == RouterTypes.DepositRouterType) return _computeDepositAddress(asset);

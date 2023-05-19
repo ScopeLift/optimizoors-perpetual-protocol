@@ -6,8 +6,8 @@ import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 
 import {IVault} from "src/interface/IVault.sol";
 
-/// @notice A router for depositing funds into the Perpetual vault. It will
-/// support a single ERC20 token and Ether.
+/// @notice A router for depositing funds into the Perpetual vault. It will support a single ERC20
+/// token and Ether.
 contract DepositRouter {
   /// @notice The token that is being deposited into the router.
   address public immutable TOKEN;
