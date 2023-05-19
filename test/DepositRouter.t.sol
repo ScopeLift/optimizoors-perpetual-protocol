@@ -40,7 +40,7 @@ contract Fallback is DepositRouterTest {
     deal(USDC, address(this), amount);
     ERC20(USDC).approve(routerAddress, amount);
 
-    (bool ok,) = payable(routerAddress).call(abi.encode(amount));
+    (bool ok,) = payable(routerAddress).call(abi.encodePacked(uint96(amount)));
 
     int256 balance = vault.getBalanceByToken(address(this), USDC);
     assertTrue(ok);

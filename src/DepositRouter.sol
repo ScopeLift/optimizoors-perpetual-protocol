@@ -24,7 +24,7 @@ contract DepositRouter {
 
   /// @notice Deposits the router's token into the Perpetual vault.
   fallback() external payable {
-    uint256 amount = abi.decode(msg.data, (uint256));
+    uint256 amount = uint256(uint96(bytes12(msg.data[0:12])));
     SafeTransferLib.safeTransferFrom(ERC20(TOKEN), msg.sender, address(this), amount);
     ERC20(TOKEN).approve(address(PERPETUAL_VAULT), amount);
     PERPETUAL_VAULT.depositFor(msg.sender, TOKEN, amount);
