@@ -43,9 +43,9 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
 
-  /// @dev Returns the sqrtPriceLimitX96 from a uint168.
-  /// @param args A uint168 that contains both the funcId and the sqrtPriceLimitX96
-  /// needed to open or close a position.
+  /// @dev Returns the `sqrtPriceLimitX96` from a `uint168`.
+  /// @param args A `uint168` that contains both the `funcId` and the 
+  /// `sqrtPriceLimitX96` needed to open or close a position.
   function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
     uint168 mask = (1 << 160) - 1;
 

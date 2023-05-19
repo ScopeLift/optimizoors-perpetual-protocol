@@ -23,13 +23,13 @@ contract PerpetualRouterFactory {
     DepositRouterType
   }
 
-  /// @notice The contract used to manage positions in perpetual.
+  /// @notice The contract used to manage positions in Perpetual.
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
 
-  /// @notice The perpetual contract that manages a users account balance.
+  /// @notice The Perpetual contract that manages a users account balance.
   IAccountBalance public immutable PERPETUAL_ACCOUNT_BALANCE;
 
-  /// @notice The contract for the perpetual vault where the deposits are sent.
+  /// @notice The contract for the Perpetual vault where the deposits are sent.
   IVault public immutable PERPETUAL_VAULT;
 
   /// @dev Emitted on a successfully deployed router.
@@ -46,7 +46,7 @@ contract PerpetualRouterFactory {
 
   /// @notice Creates a contract for a given asset and router type, and
   /// returns the address for the deployed contract.
-  /// @dev This function will only revert with RouterTypeDoesNotExist if a new
+  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new
   /// router is added and the case has not been handled yet. It should never
   /// revert in production.
   /// @param type_ The type of router to deploy.
@@ -72,7 +72,7 @@ contract PerpetualRouterFactory {
   /// @notice Returns the address for a router of a given asset and router type.
   /// This function will still return an address even if the router has not
   /// been deployed.
-  /// @dev This function will only revert with RouterTypeDoesNotExist if a new
+  /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new
   /// router is added and the case has not been handled yet. It should never
   /// revert in production.
   function computeAddress(RouterTypes type_, address asset) external view returns (address) {
@@ -103,7 +103,7 @@ contract PerpetualRouterFactory {
     );
   }
 
-  /// @dev Creates salt value used when creating a contract using CREATE2.
+  /// @dev Creates salt value used when creating a contract using `CREATE2`.
   function _salt(address asset) internal pure returns (bytes32) {
     return bytes32(uint256(uint160(asset)));
   }

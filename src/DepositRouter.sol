@@ -12,11 +12,11 @@ contract DepositRouter {
   /// @notice The token that is being deposited into the router.
   address public immutable TOKEN;
 
-  /// @notice The contract for the perpetual vault where the deposits are sent.
+  /// @notice The contract for the Perpetual vault where the deposits are sent.
   IVault public immutable PERPETUAL_VAULT;
 
-  /// @param token The token that is being deposited into the router.
-  /// @param vault The contract for the Perpetual vault where the deposits are sent.
+  /// @param token Address of the token that is being deposited into the router.
+  /// @param vault Address of the Perpetual vault where the deposits are sent.
   constructor(address token, IVault vault) {
     TOKEN = token;
     PERPETUAL_VAULT = vault;
