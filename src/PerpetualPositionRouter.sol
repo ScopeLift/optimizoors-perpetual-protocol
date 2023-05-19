@@ -11,7 +11,11 @@ import {IAccountBalance} from "src/interface/IAccountBalance.sol";
 contract PerpetualPositionRouter {
   using SignedMath for int256;
 
+  /// @dev Thrown when a function tries to use a function that does not exist.
   error FunctionDoesNotExist();
+
+  /// @dev Thrown when a user tries to take an action on a position that does 
+  /// not exist.
   error NoExistingPosition();
 
   /// @notice The contract used to manage positions in perpetual.
@@ -23,11 +27,13 @@ contract PerpetualPositionRouter {
   /// @notice The perpetual contract that manages a users account balance.
   IAccountBalance public immutable ACCOUNT_BALANCE;
 
-  /// @dev The default value for a referral code used when
-  /// opening a position.
+  /// @dev The default value for a referral code used when opening a position.
   bytes32 internal constant REFERRAL_CODE =
     0x0000000000000000000000000000000000000000000000000000000000000000;
 
+  /// @param clearingHouse Address of the Perpetual clearing house contract.
+  /// @param accountBalance Address of the Perpetual account balance contract.
+  /// @param asset Address of the token used for the perpetual position.
   constructor(IClearingHouse clearingHouse, IAccountBalance accountBalance, address asset) {
     PERPETUAL_CLEARING_HOUSE = clearingHouse;
     ACCOUNT_BALANCE = accountBalance;
@@ -37,12 +43,21 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the perpetual vault?
   receive() external payable {}
 
+  /// @dev Returns the sqrtPriceLimitX96 from a uint168.
+  /// @param args A uint168 that contains both the funcId and the sqrtPriceLimitX96
+  /// needed to open or close a position.
   function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
     uint168 mask = (1 << 160) - 1;
 
     return uint160(args & mask);
   }
 
+  /// @dev Used to open a long position that takes in the exact amount of input
+  /// tokens.
+  /// @param amount The input amount of the position.
+  /// @param oppositeAmountBound The lower bound of the router token.
+  /// @param sqrtPriceLimitX96 The restriction on the ending price after the 
+  /// swap.
   function _openLongInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
   {
@@ -60,7 +75,12 @@ contract PerpetualPositionRouter {
       })
     );
   }
-
+  /// @dev Used to open a long position specifying the output amount of the 
+  /// position.
+  /// @param amount The output amount of the position.
+  /// @param oppositeAmountBound The upper bound on the input quote token (vUSDC).
+  /// @param sqrtPriceLimitX96 The restriction on the ending price after the 
+  /// swap.
   function _openLongOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
   {
@@ -78,7 +98,12 @@ contract PerpetualPositionRouter {
       })
     );
   }
-
+  /// @dev Used to open a short position specifying the input amount of the 
+  /// position.
+  /// @param amount The input amount of the position.
+  /// @param oppositeAmountBound The lower bound on the output quote token (vUSDC).
+  /// @param sqrtPriceLimitX96 The restriction on the ending price after the 
+  /// swap.
   function _openShortInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
   {
@@ -97,6 +122,12 @@ contract PerpetualPositionRouter {
     );
   }
 
+  /// @dev Used to open a short position specifying the output amount of the 
+  /// position.
+  /// @param amount The output amount of the position.
+  /// @param oppositeAmountBound The upper bound of the router token.
+  /// @param sqrtPriceLimitX96 The restriction on the ending price after the 
+  /// swap.
   function _openShortOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
     internal
   {
@@ -115,6 +146,13 @@ contract PerpetualPositionRouter {
     );
   }
 
+  /// @dev Closes an open position for the router's token.
+  /// @param oppositeAmountBound If the position being closed in a long position
+  /// then this will be the upper bound on the input quote token (vUSDC). 
+  /// If the position is a short position then this will be the lower bound on
+  /// the output quote token (vUSDC).
+  /// @param sqrtPriceLimitX96 The restriction on the ending price after the 
+  /// swap.
   function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) internal {
     int256 takerPositionSize = ACCOUNT_BALANCE.getTakerPositionSize(msg.sender, TOKEN);
     if (takerPositionSize == 0) revert NoExistingPosition();
@@ -134,17 +172,9 @@ contract PerpetualPositionRouter {
     );
   }
 
-  // TODO: Greater optimization is possible but it will add more complexity.
-  // In order to avoid going down the wrong path we will wait until we can talk
-  // to the projects.
-  //
-  //
-  //
-  // Going to push on the integer optimization as we figure out the pros and
-  // cons.
-  //
-  // 1. What us a reasonable amount of precision to reduce the function?
-  // 2. What are reasonable time periods for deadlines
+  /// @dev Creates or closes a position depending on the passed in funcId. 
+  /// Decoding of the calldata will be conditional on which funcId is being 
+  /// passed in.
   fallback() external payable {
     // The first 11 bytes are padding. The 12th byte will contain the function
     // name which we will use to pick the correct decoding strategy
