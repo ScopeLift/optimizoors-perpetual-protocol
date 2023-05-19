@@ -22,7 +22,6 @@ contract DepositRouter {
     PERPETUAL_VAULT = vault;
   }
 
-
   /// @notice Deposits the router's token into the Perpetual vault.
   fallback() external payable {
     uint256 amount = abi.decode(msg.data, (uint256));
