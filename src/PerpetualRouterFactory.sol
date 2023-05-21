@@ -17,7 +17,7 @@ contract PerpetualRouterFactory {
   error RouterTypeDoesNotExist();
 
   /// @dev The different types of routers that can be deployed by the factory.
-  enum RouterTypes {
+  enum RouterType {
     PositionRouterType,
     DepositRouterType
   }
@@ -32,7 +32,7 @@ contract PerpetualRouterFactory {
   IVault public immutable PERPETUAL_VAULT;
 
   /// @dev Emitted on a successfully deployed router.
-  event RouterDeployed(RouterTypes indexed routerType, address indexed asset);
+  event RouterDeployed(RouterType indexed type_, address indexed asset);
 
   /// @param clearingHouse Address of the Perpetual clearing house contract.
   /// @param accountBalance Address of the Perpetual account balance contract.
@@ -49,21 +49,21 @@ contract PerpetualRouterFactory {
   /// the case has not been handled yet. It should never revert in production.
   /// @param type_ The type of router to deploy.
   /// @param asset The token the router uses to manage deposits and positions.
-  function deploy(RouterTypes type_, address asset) external returns (address) {
+  function deploy(RouterType type_, address asset) external returns (address) {
     bytes32 salt = _salt(asset);
     address router;
-    if (type_ == RouterTypes.PositionRouterType) {
+    if (type_ == RouterType.PositionRouterType) {
       router = address(
         new PerpetualPositionRouter{salt: salt}(
           PERPETUAL_CLEARING_HOUSE, PERPETUAL_ACCOUNT_BALANCE, asset
         )
       );
-    } else if (type_ == RouterTypes.DepositRouterType) {
+    } else if (type_ == RouterType.DepositRouterType) {
       router = address(new DepositRouter{salt: salt}(asset, PERPETUAL_VAULT));
     } else {
       revert RouterTypeDoesNotExist();
     }
-    emit RouterDeployed(RouterTypes.PositionRouterType, asset);
+    emit RouterDeployed(type_, asset);
     return router;
   }
 
@@ -71,9 +71,9 @@ contract PerpetualRouterFactory {
   /// will still return an address even if the router has not been deployed.
   /// @dev This function will only revert with `RouterTypeDoesNotExist` if a new router is added and
   /// the case has not been handled yet. It should never revert in production.
-  function computeAddress(RouterTypes type_, address asset) external view returns (address) {
-    if (type_ == RouterTypes.PositionRouterType) return _computePositionAddress(asset);
-    else if (type_ == RouterTypes.DepositRouterType) return _computeDepositAddress(asset);
+  function computeAddress(RouterType type_, address asset) external view returns (address) {
+    if (type_ == RouterType.PositionRouterType) return _computePositionAddress(asset);
+    else if (type_ == RouterType.DepositRouterType) return _computeDepositAddress(asset);
     else revert RouterTypeDoesNotExist();
   }
 

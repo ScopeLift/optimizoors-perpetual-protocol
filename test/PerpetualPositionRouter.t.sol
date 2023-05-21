@@ -27,7 +27,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
     PerpetualRouterFactory factory =
       new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
     vethPositionRouterAddr =
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH));
+      address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
   function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
@@ -106,11 +106,11 @@ contract Fallback is PositionRouterTest {
   function setUp() public override {
     vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
     factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
-    factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
+    factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
     deal(address(this), 100 ether);
     vault.depositEther{value: 10 ether}();
     vethPositionRouterAddr =
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH));
+      address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
   function testFork_OpenLongExactInputPosition() public {

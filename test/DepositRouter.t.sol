@@ -16,9 +16,9 @@ contract DepositRouterTest is Test, PerpetualContracts {
   function setUp() public {
     vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
     factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
-    factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
+    factory.deploy(PerpetualRouterFactory.RouterType.DepositRouterType, USDC);
     routerAddress =
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC));
+      address(factory.computeAddress(PerpetualRouterFactory.RouterType.DepositRouterType, USDC));
   }
 }
 
