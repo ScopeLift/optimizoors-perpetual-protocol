@@ -26,11 +26,11 @@ contract RouterFactoryTest is Test, PerpetualContracts {
 }
 
 contract Constructor is RouterFactoryTest {
-   function testFork_CorrectlySetsAllConstructorArgs() public {
+  function testFork_CorrectlySetsAllConstructorArgs() public {
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
-			clearingHouse,
-			accountBalance,
-			vault
+  	clearingHouse,
+  	accountBalance,
+  	vault
         );
     assertEq(
       address(factory.PERPETUAL_CLEARING_HOUSE()),
@@ -43,9 +43,7 @@ contract Constructor is RouterFactoryTest {
       "PERPETUAL_ACCOUNT_BALANCE was not set correctly"
     );
     assertEq(
-      address(factory.PERPETUAL_VAULT()),
-      address(vault),
-      "PERPETUAL_VAULT was not set correctly"
+      address(factory.PERPETUAL_VAULT()), address(vault), "PERPETUAL_VAULT was not set correctly"
     );
   }
 }
@@ -53,9 +51,9 @@ contract Constructor is RouterFactoryTest {
 contract Deploy is RouterFactoryTest {
   function setUp() public {
     factory = new PerpetualRouterFactory(
-			clearingHouse,
-			accountBalance,
-			vault
+  	clearingHouse,
+  	accountBalance,
+  	vault
         );
   }
 
@@ -81,8 +79,8 @@ contract Deploy is RouterFactoryTest {
       factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
     assertEq(
       positionRouter,
-      factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH), 
-"Address not equal to the computed position router address"
+      factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH),
+      "Address not equal to the computed position router address"
     );
   }
 
@@ -91,7 +89,6 @@ contract Deploy is RouterFactoryTest {
       factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
     assertGt(positionRouter.code.length, 0, "no code");
   }
-
 
   function test_ReturnsDepositRouterAddress() public {
     PerpetualRouterFactory factory =
@@ -102,7 +99,7 @@ contract Deploy is RouterFactoryTest {
     assertEq(
       USDCDepositRouter,
       factory.computeAddress(PerpetualRouterFactory.RouterType.DepositRouterType, USDC),
-	  "Address not equal to the computed deposit router address"
+      "Address not equal to the computed deposit router address"
     );
   }
 
@@ -125,15 +122,14 @@ contract Deploy is RouterFactoryTest {
     vm.expectRevert(bytes(""));
     factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
   }
-
 }
 
 contract ComputeAddress is RouterFactoryTest {
   function setUp() public {
     factory = new PerpetualRouterFactory(
-			clearingHouse,
-			accountBalance,
-			vault
+  	clearingHouse,
+  	accountBalance,
+  	vault
         );
   }
 

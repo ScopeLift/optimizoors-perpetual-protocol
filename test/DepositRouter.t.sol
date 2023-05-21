@@ -26,13 +26,9 @@ contract Constructor is DepositRouterTest {
   function test_CorrectlySetsAllConstructorArgs() public {
     DepositRouter router = new DepositRouter(
   	  VETH,
-	  vault
+   vault
   );
-    assertEq(
-      address(router.PERPETUAL_VAULT()),
-      address(vault),
-      "VAULT not set correctly"
-    );
+    assertEq(address(router.PERPETUAL_VAULT()), address(vault), "VAULT not set correctly");
     assertEq(router.TOKEN(), VETH, "TOKEN not set correctly");
   }
 }
@@ -40,7 +36,7 @@ contract Constructor is DepositRouterTest {
 contract Fallback is DepositRouterTest {
   function testForkFuzz_DepositUsdc(uint256 amount) public {
     uint256 settlementTokenBalanceCap = clearingHouseConfig.getSettlementTokenBalanceCap();
-	uint256 vaultBalance = ERC20(USDC).balanceOf(address(vault));
+    uint256 vaultBalance = ERC20(USDC).balanceOf(address(vault));
 
     vm.assume(amount < settlementTokenBalanceCap - vaultBalance);
     vm.assume(amount > 0);
@@ -59,11 +55,11 @@ contract Fallback is DepositRouterTest {
 contract Receive is DepositRouterTest {
   function testForkFuzz_DepositEther(uint256 amount) public {
     uint256 depositCap = collateralManager.getCollateralConfig(WETH).depositCap;
-	uint256 vaultBalance = ERC20(WETH).balanceOf(address(vault));
+    uint256 vaultBalance = ERC20(WETH).balanceOf(address(vault));
 
     vm.assume(amount < depositCap - vaultBalance);
     vm.assume(amount > 0);
- 
+
     deal(address(this), amount);
     (bool ok,) = payable(routerAddress).call{value: amount}("");
     int256 balance = vault.getBalanceByToken(address(this), WETH);
