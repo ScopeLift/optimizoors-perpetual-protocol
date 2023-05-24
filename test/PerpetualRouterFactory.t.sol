@@ -28,10 +28,10 @@ contract RouterFactoryTest is Test, PerpetualContracts {
 contract Constructor is RouterFactoryTest {
   function testFork_CorrectlySetsAllConstructorArgs() public {
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
-  	clearingHouse,
-  	accountBalance,
-  	vault
-        );
+      clearingHouse,
+      accountBalance,
+      vault
+    );
     assertEq(
       address(factory.PERPETUAL_CLEARING_HOUSE()),
       address(clearingHouse),
@@ -51,10 +51,10 @@ contract Constructor is RouterFactoryTest {
 contract Deploy is RouterFactoryTest {
   function setUp() public {
     factory = new PerpetualRouterFactory(
-  	clearingHouse,
-  	accountBalance,
-  	vault
-        );
+        clearingHouse,
+        accountBalance,
+        vault
+    );
   }
 
   function test_EmitPositionRouterDeployedEvent() public {
@@ -84,7 +84,7 @@ contract Deploy is RouterFactoryTest {
     );
   }
 
-  function testFork_CorrectlyDeploysPositionRouter() public {
+  function test_CorrectlyDeploysPositionRouter() public {
     address positionRouter =
       factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
     assertGt(positionRouter.code.length, 0, "no code");
@@ -103,7 +103,7 @@ contract Deploy is RouterFactoryTest {
     );
   }
 
-  function testFork_CorrectlyDeploysDepositRouter() public {
+  function test_CorrectlyDeploysDepositRouter() public {
     address depositRouter =
       factory.deploy(PerpetualRouterFactory.RouterType.DepositRouterType, VETH);
     assertGt(depositRouter.code.length, 0, "no code");
@@ -127,10 +127,10 @@ contract Deploy is RouterFactoryTest {
 contract ComputeAddress is RouterFactoryTest {
   function setUp() public {
     factory = new PerpetualRouterFactory(
-  	clearingHouse,
-  	accountBalance,
-  	vault
-        );
+        clearingHouse,
+        accountBalance,
+        vault
+    );
   }
 
   function test_ComputeDepositRouterAddress() public {

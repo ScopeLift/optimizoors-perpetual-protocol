@@ -24,10 +24,7 @@ contract DepositRouterTest is Test, PerpetualContracts {
 
 contract Constructor is DepositRouterTest {
   function test_CorrectlySetsAllConstructorArgs() public {
-    DepositRouter router = new DepositRouter(
-  	  VETH,
-   vault
-  );
+    DepositRouter router = new DepositRouter(VETH, vault);
     assertEq(address(router.PERPETUAL_VAULT()), address(vault), "VAULT not set correctly");
     assertEq(router.TOKEN(), VETH, "TOKEN not set correctly");
   }
@@ -38,8 +35,7 @@ contract Fallback is DepositRouterTest {
     uint256 settlementTokenBalanceCap = clearingHouseConfig.getSettlementTokenBalanceCap();
     uint256 vaultBalance = ERC20(USDC).balanceOf(address(vault));
 
-    vm.assume(amount < settlementTokenBalanceCap - vaultBalance);
-    vm.assume(amount > 0);
+    amount = bound(amount, 1, settlementTokenBalanceCap - vaultBalance);
 
     deal(USDC, address(this), amount);
     ERC20(USDC).approve(routerAddress, amount);
@@ -57,8 +53,7 @@ contract Receive is DepositRouterTest {
     uint256 depositCap = collateralManager.getCollateralConfig(WETH).depositCap;
     uint256 vaultBalance = ERC20(WETH).balanceOf(address(vault));
 
-    vm.assume(amount < depositCap - vaultBalance);
-    vm.assume(amount > 0);
+    amount = bound(amount, 1, depositCap - vaultBalance);
 
     deal(address(this), amount);
     (bool ok,) = payable(routerAddress).call{value: amount}("");

@@ -56,10 +56,10 @@ contract PositionRouterTest is Test, PerpetualContracts {
 contract Constructor is PositionRouterTest {
   function test_CorrectlySetsAllConstructorArgs() public {
     PerpetualPositionRouter router = new PerpetualPositionRouter(
-  	  clearingHouse,
-  	  accountBalance,
-  	  VETH
-  );
+        clearingHouse,
+        accountBalance,
+        VETH
+    );
     assertEq(
       address(router.PERPETUAL_CLEARING_HOUSE()),
       address(clearingHouse),
@@ -198,19 +198,19 @@ contract Fallback is PositionRouterTest {
     assertEq(info.takerPositionSize, 0);
   }
 
-  function test_FailedCallWhenExtraCalldataArgument() public {
+  function testFork_FailedCallWhenExtraCalldataArgument() public {
     uint168 combinedArgs = encodeArgs(4, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0, 100));
     assertTrue(!ok);
   }
 
-  function test_FailedClosePositionCallWithWrongArguments() public {
+  function testFork_FailedClosePositionCallWithWrongArguments() public {
     uint168 combinedArgs = encodeArgs(5, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     assertTrue(!ok);
   }
 
-  function test_FailedFallbackWithZeroFuncId() public {
+  function testFork_FailedFallbackWithZeroFuncId() public {
     uint168 combinedArgs = encodeArgs(0, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     assertTrue(!ok);
