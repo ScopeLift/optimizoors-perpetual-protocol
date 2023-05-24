@@ -72,9 +72,6 @@ contract Deploy is RouterFactoryTest {
   }
 
   function test_ReturnsPositionRouterAddress() public {
-    PerpetualRouterFactory factory =
-      new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
-
     address positionRouter =
       factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
     assertEq(
@@ -91,9 +88,6 @@ contract Deploy is RouterFactoryTest {
   }
 
   function test_ReturnsDepositRouterAddress() public {
-    PerpetualRouterFactory factory =
-      new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
-
     address USDCDepositRouter =
       factory.deploy(PerpetualRouterFactory.RouterType.DepositRouterType, USDC);
     assertEq(
