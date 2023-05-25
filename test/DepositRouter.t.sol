@@ -31,7 +31,7 @@ contract Constructor is DepositRouterTest {
 }
 
 contract Fallback is DepositRouterTest {
-  function testForkFuzz_DepositUsdc(uint256 amount) public {
+  function testForkFuzz_TraderDepositsUsdcIntoVault(uint256 amount) public {
     uint256 settlementTokenBalanceCap = clearingHouseConfig.getSettlementTokenBalanceCap();
     uint256 vaultBalance = ERC20(USDC).balanceOf(address(vault));
 
@@ -49,7 +49,7 @@ contract Fallback is DepositRouterTest {
 }
 
 contract Receive is DepositRouterTest {
-  function testForkFuzz_DepositEther(uint256 amount) public {
+  function testForkFuzz_TraderDepositsEtherIntoVault(uint256 amount) public {
     uint256 depositCap = collateralManager.getCollateralConfig(WETH).depositCap;
     uint256 vaultBalance = ERC20(WETH).balanceOf(address(vault));
 
