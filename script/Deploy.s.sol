@@ -16,9 +16,9 @@ contract Deploy is Script, PerpetualContracts {
       new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
 
     vm.broadcast();
-    factory.deploy(PerpetualRouterFactory.RouterTypes.DepositRouterType, USDC);
+    factory.deploy(PerpetualRouterFactory.RouterType.DepositRouterType, USDC);
 
     vm.broadcast();
-    factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
+    factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
   }
 }

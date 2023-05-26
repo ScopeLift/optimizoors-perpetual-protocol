@@ -3,25 +3,38 @@ pragma solidity ^0.8.0;
 
 import {Test} from "forge-std/Test.sol";
 
+import {IAccountBalance} from "src/interface/IAccountBalance.sol";
+import {IClearingHouse} from "src/interface/IClearingHouse.sol";
 import {PerpetualRouterFactory} from "src/PerpetualRouterFactory.sol";
+import {PerpetualPositionRouter} from "src/PerpetualPositionRouter.sol";
 import {AccountMarket} from "src/lib/AccountMarket.sol";
 import {PerpetualContracts} from "test/PerpetualContracts.sol";
 
-contract PositionRouterForkTestBase is Test, PerpetualContracts {
-  PerpetualRouterFactory factory;
+contract PerpetualPositionRouterTestHarness is PerpetualPositionRouter {
+  constructor(IClearingHouse clearingHouse, IAccountBalance accountBalance, address asset)
+    PerpetualPositionRouter(clearingHouse, accountBalance, asset)
+  {}
+
+  function extractSqrtPriceLimitX96(uint168 args) external pure returns (uint160) {
+    return _extractSqrtPriceLimitX96(args);
+  }
+}
+
+contract PositionRouterTest is Test, PerpetualContracts {
   address vethPositionRouterAddr;
 
-  function setUp() public {
-    vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
-    factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
-    factory.deploy(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH);
-    deal(address(this), 100 ether);
-    vault.depositEther{value: 10 ether}();
+  function setUp() public virtual {
+    PerpetualRouterFactory factory =
+      new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
     vethPositionRouterAddr =
-      address(factory.computeAddress(PerpetualRouterFactory.RouterTypes.PositionRouterType, VETH));
+      address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
-  function closePosititionHelper(
+  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
+    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
+  }
+
+  function closePositionHelper(
     uint8 openFunc,
     uint256 amount,
     uint256 oppositeAmountBound,
@@ -38,14 +51,69 @@ contract PositionRouterForkTestBase is Test, PerpetualContracts {
     assertTrue(ok);
     assertTrue(okTwo);
   }
+}
 
-  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
-    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
+contract Constructor is PositionRouterTest {
+  function test_CorrectlySetsAllConstructorArgs() public {
+    PerpetualPositionRouter router = new PerpetualPositionRouter(
+        clearingHouse,
+        accountBalance,
+        VETH
+    );
+    assertEq(
+      address(router.PERPETUAL_CLEARING_HOUSE()),
+      address(clearingHouse),
+      "PERPETUAL_CLEARING_HOUSE not set correctly"
+    );
+    assertEq(
+      address(router.ACCOUNT_BALANCE()),
+      address(accountBalance),
+      "ACCOUNT_BALANCE not set correctly"
+    );
+    assertEq(router.TOKEN(), VETH, "TOKEN not set correctly");
   }
 }
 
-contract OpenPositionLongInputFork is PositionRouterForkTestBase {
-  function test_FallbackLongInput() public {
+contract _ExtractSqrtPriceLimitX96 is PositionRouterTest {
+  function testFuzz_SuccessfullyExtractsSqrtPriceLimitX96(uint8 funcId, uint160 sqrtPriceLimitX96)
+    public
+  {
+    PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
+      clearingHouse,
+      accountBalance,
+      VETH
+    );
+    assertEq(
+      harness.extractSqrtPriceLimitX96(encodeArgs(funcId, sqrtPriceLimitX96)), sqrtPriceLimitX96
+    );
+  }
+
+  function testFuzz_SuccessfullyReencodeArgs(uint168 args) public {
+    PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
+      clearingHouse,
+      accountBalance,
+      VETH
+    );
+    uint168 firstEightBitMask = ((1 << 8) - 1) << 160;
+    uint8 funcId = uint8((args & firstEightBitMask) >> 160);
+    assertEq(encodeArgs(funcId, harness.extractSqrtPriceLimitX96(args)), args);
+  }
+}
+
+contract Fallback is PositionRouterTest {
+  PerpetualRouterFactory factory;
+
+  function setUp() public override {
+    vm.createSelectFork(vm.rpcUrl("optimism"), 87_407_144);
+    factory = new PerpetualRouterFactory(clearingHouse, accountBalance, vault);
+    factory.deploy(PerpetualRouterFactory.RouterType.PositionRouterType, VETH);
+    deal(address(this), 100 ether);
+    vault.depositEther{value: 10 ether}();
+    vethPositionRouterAddr =
+      address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
+  }
+
+  function testFork_OpenLongExactInputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint168 combinedArgs = encodeArgs(4, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -59,7 +127,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     assertEq(info.takerPositionSize, 538_599_759_293_451);
   }
 
-  function test_FallbackLongOutput() public {
+  function testFork_OpenLongExactOutputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint168 combinedArgs = encodeArgs(3, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -74,7 +142,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     assertEq(info.takerPositionSize, 1 ether);
   }
 
-  function test_FallbackShortInput() public {
+  function testFork_OpenShortExactInputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint168 combinedArgs = encodeArgs(2, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -87,7 +155,7 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     assertEq(info.takerPositionSize, -1 ether);
   }
 
-  function test_FallbackShortOutput() public {
+  function testFork_OpenShortExactOutputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint168 combinedArgs = encodeArgs(1, 0);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -100,33 +168,51 @@ contract OpenPositionLongInputFork is PositionRouterForkTestBase {
     assertEq(info.takerPositionSize, -539_678_586_420_661);
   }
 
-  function test_FallbackClosePositionLong() public {
-    closePosititionHelper(4, 1 ether, 0, 0);
+  function testFork_CloseLongExactInputPosition() public {
+    closePositionHelper(4, 1 ether, 0, 0);
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
   }
 
-  function test_FallbackClosePositionShortInput() public {
-    closePosititionHelper(2, 5 ether, 0, 0);
+  function testFork_CloseLongExactOutputPosition() public {
+    closePositionHelper(3, 1 ether, 0, 0);
 
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
   }
 
-  function test_FallbackClosePositionShortOutput() public {
-    closePosititionHelper(1, 1 ether, 0, 0);
+  function testFork_CloseShortExactInputPosition() public {
+    closePositionHelper(2, 5 ether, 0, 0);
+
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
   }
 
-  function test_FallbackClosePositionLongOutput() public {
-    closePosititionHelper(3, 1 ether, 0, 0);
-
+  function testFork_CloseShortExactOutputPosition() public {
+    closePositionHelper(1, 1 ether, 0, 0);
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, 0);
     assertEq(info.takerPositionSize, 0);
+  }
+
+  function testFork_FailedCallWhenExtraCalldataArgument() public {
+    uint168 combinedArgs = encodeArgs(4, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0, 100));
+    assertTrue(!ok);
+  }
+
+  function testFork_FailedClosePositionCallWithWrongArguments() public {
+    uint168 combinedArgs = encodeArgs(5, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
+    assertTrue(!ok);
+  }
+
+  function testFork_FailedFallbackWithZeroFuncId() public {
+    uint168 combinedArgs = encodeArgs(0, 0);
+    (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
+    assertTrue(!ok);
   }
 }
