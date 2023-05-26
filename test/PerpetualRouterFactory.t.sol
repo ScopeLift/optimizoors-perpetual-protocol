@@ -26,7 +26,7 @@ contract RouterFactoryTest is Test, PerpetualContracts {
 }
 
 contract Constructor is RouterFactoryTest {
-  function testFork_CorrectlySetsAllConstructorArgs() public {
+  function test_CorrectlySetsAllConstructorArgs() public {
     PerpetualRouterFactory factory = new PerpetualRouterFactory(
       clearingHouse,
       accountBalance,
