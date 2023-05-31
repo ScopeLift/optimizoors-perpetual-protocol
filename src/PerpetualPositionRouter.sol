@@ -46,7 +46,7 @@ contract PerpetualPositionRouter {
   /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
   /// to open or close a position.
   function _extractSqrtPriceLimitX96(uint200 args) internal pure returns (uint160) {
-    // Remove the deadline paramter and then only keep the positive bits in the next 160 bits
+    // Remove the deadline parameter and then only keep the positive bits in the next 160 bits
     return uint160((args >> 32) & ((1 << 160) - 1));
   }
 
@@ -159,7 +159,7 @@ contract PerpetualPositionRouter {
         isExactInput: false,
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
-        deadline: deadline, // TODO: verify this is market order behavior, and do we need a
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -210,7 +210,7 @@ contract PerpetualPositionRouter {
       (combinedArgs, oppositeAmountBound) = abi.decode(msg.data, (uint200, uint256));
     }
     uint160 sqrtPriceLimitX96 = _extractSqrtPriceLimitX96(combinedArgs);
-    uint256 deadline = block.timestamp + (_extractDeadline(combinedArgs) * 1 seconds);
+    uint256 deadline = block.timestamp + _extractDeadline(combinedArgs);
 
     if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
     else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
