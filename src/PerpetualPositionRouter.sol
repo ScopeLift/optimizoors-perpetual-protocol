@@ -44,8 +44,7 @@ contract PerpetualPositionRouter {
 
   /// @dev Returns the `sqrtPriceLimitX96` from a `uint200`.
   /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
-  /// to
-  /// open or close a position.
+  /// to open or close a position.
   function _extractSqrtPriceLimitX96(uint200 args) internal pure returns (uint160) {
     // Remove the deadline paramter and then only keep the positive bits in the next 160 bits
     return uint160((args >> 32) & ((1 << 160) - 1));
@@ -53,8 +52,7 @@ contract PerpetualPositionRouter {
 
   /// @dev Returns the `deadline` from a `uint200`.
   /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
-  /// to
-  /// open or close a position.
+  /// to open or close a position.
   function _extractDeadline(uint200 args) internal pure returns (uint32) {
     uint32 mask = (1 << 32) - 1;
     return uint32(args & mask);
