@@ -82,6 +82,22 @@ contract Constructor is PositionRouterTest {
   }
 }
 
+contract _ExtractDeadline is PositionRouterTest {
+  function testFuzz_SuccessfullyExtractsDeadline(
+    uint8 funcId,
+    uint160 sqrtPriceLimitX96,
+    uint32 deadline
+  ) public {
+    PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
+      clearingHouse,
+      accountBalance,
+      VETH
+    );
+
+    assertEq(harness.extractDeadline(encodeArgs(funcId, sqrtPriceLimitX96, deadline)), deadline);
+  }
+}
+
 contract _ExtractSqrtPriceLimitX96 is PositionRouterTest {
   function testFuzz_SuccessfullyExtractsSqrtPriceLimitX96(
     uint8 funcId,
@@ -97,20 +113,6 @@ contract _ExtractSqrtPriceLimitX96 is PositionRouterTest {
       harness.extractSqrtPriceLimitX96(encodeArgs(funcId, sqrtPriceLimitX96, deadline)),
       sqrtPriceLimitX96
     );
-  }
-
-  function testFuzz_SuccessfullyExtractsDeadline(
-    uint8 funcId,
-    uint160 sqrtPriceLimitX96,
-    uint32 deadline
-  ) public {
-    PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
-      clearingHouse,
-      accountBalance,
-      VETH
-    );
-
-    assertEq(harness.extractDeadline(encodeArgs(funcId, sqrtPriceLimitX96, deadline)), deadline);
   }
 
   function testFuzz_SuccessfullyReencodeArgs(uint200 args) public {
