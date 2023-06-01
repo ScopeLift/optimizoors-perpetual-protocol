@@ -42,21 +42,34 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the Perpetual vault?
   receive() external payable {}
 
-  /// @dev Returns the `sqrtPriceLimitX96` from a `uint168`.
-  /// @param args A `uint168` that contains both the `funcId` and the `sqrtPriceLimitX96` needed to
-  /// open or close a position.
-  function _extractSqrtPriceLimitX96(uint168 args) internal pure returns (uint160) {
-    uint168 mask = (1 << 160) - 1;
-    return uint160(args & mask);
+  /// @dev Returns the `sqrtPriceLimitX96` from a `uint200`.
+  /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
+  /// to open or close a position.
+  function _extractSqrtPriceLimitX96(uint200 args) internal pure returns (uint160) {
+    // Remove the deadline parameter and then only keep the positive bits in the next 160 bits
+    return uint160((args >> 32) & ((1 << 160) - 1));
+  }
+
+  /// @dev Returns the `deadline` from a `uint200`.
+  /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
+  /// to open or close a position.
+  function _extractDeadline(uint200 args) internal pure returns (uint32) {
+    uint32 mask = (1 << 32) - 1;
+    return uint32(args & mask);
   }
 
   /// @dev Used to open a long position that takes in the exact amount of input tokens.
   /// @param amount The input amount of the position.
   /// @param oppositeAmountBound The lower bound of the router token.
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
-  function _openLongInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    internal
-  {
+  /// @param deadline The restriction on when the tx should be executed; otherwise, tx will get
+  /// reverted.
+  function _openLongInput(
+    uint256 amount,
+    uint256 oppositeAmountBound,
+    uint160 sqrtPriceLimitX96,
+    uint256 deadline
+  ) internal {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
       IClearingHouse.OpenPositionParams({
@@ -65,7 +78,7 @@ contract PerpetualPositionRouter {
         isExactInput: true,
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
-        deadline: type(uint256).max,
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -76,9 +89,14 @@ contract PerpetualPositionRouter {
   /// @param amount The output amount of the position.
   /// @param oppositeAmountBound The upper bound on the input quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
-  function _openLongOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    internal
-  {
+  /// @param deadline The restriction on when the tx should be executed; otherwise, tx will get
+  /// reverted.
+  function _openLongOutput(
+    uint256 amount,
+    uint256 oppositeAmountBound,
+    uint160 sqrtPriceLimitX96,
+    uint256 deadline
+  ) internal {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
       IClearingHouse.OpenPositionParams({
@@ -87,7 +105,7 @@ contract PerpetualPositionRouter {
         isExactInput: false,
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
-        deadline: type(uint256).max,
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -98,9 +116,14 @@ contract PerpetualPositionRouter {
   /// @param amount The input amount of the position.
   /// @param oppositeAmountBound The lower bound on the output quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
-  function _openShortInput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    internal
-  {
+  /// @param deadline The restriction on when the tx should be executed; otherwise, tx will get
+  /// reverted.
+  function _openShortInput(
+    uint256 amount,
+    uint256 oppositeAmountBound,
+    uint160 sqrtPriceLimitX96,
+    uint256 deadline
+  ) internal {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
       IClearingHouse.OpenPositionParams({
@@ -109,7 +132,7 @@ contract PerpetualPositionRouter {
         isExactInput: true,
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
-        deadline: type(uint256).max,
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -120,9 +143,14 @@ contract PerpetualPositionRouter {
   /// @param amount The output amount of the position.
   /// @param oppositeAmountBound The upper bound of the router token.
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
-  function _openShortOutput(uint256 amount, uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96)
-    internal
-  {
+  /// @param deadline The restriction on when the tx should be executed; otherwise, tx will get
+  /// reverted.
+  function _openShortOutput(
+    uint256 amount,
+    uint256 oppositeAmountBound,
+    uint160 sqrtPriceLimitX96,
+    uint256 deadline
+  ) internal {
     PERPETUAL_CLEARING_HOUSE.openPositionFor(
       msg.sender,
       IClearingHouse.OpenPositionParams({
@@ -131,7 +159,7 @@ contract PerpetualPositionRouter {
         isExactInput: false,
         amount: amount,
         oppositeAmountBound: oppositeAmountBound,
-        deadline: type(uint256).max, // TODO: verify this is market order behavior, and do we need a
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -143,7 +171,11 @@ contract PerpetualPositionRouter {
   /// the upper bound on the input quote token (e.g. vUSDC). If the position is a short position
   /// then this will be the lower bound on the output quote token (e.g. vUSDC).
   /// @param sqrtPriceLimitX96 The restriction on the ending price after the swap.
-  function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96) internal {
+  /// @param deadline The restriction on when the tx should be executed; otherwise, tx will get
+  /// reverted.
+  function _closePosition(uint256 oppositeAmountBound, uint160 sqrtPriceLimitX96, uint256 deadline)
+    internal
+  {
     int256 takerPositionSize = ACCOUNT_BALANCE.getTakerPositionSize(msg.sender, TOKEN);
     if (takerPositionSize == 0) revert NoExistingPosition();
     bool shortPosition = takerPositionSize > 0 ? true : false;
@@ -155,7 +187,7 @@ contract PerpetualPositionRouter {
         isExactInput: shortPosition,
         amount: takerPositionSize.abs(),
         oppositeAmountBound: oppositeAmountBound,
-        deadline: type(uint256).max,
+        deadline: deadline,
         sqrtPriceLimitX96: sqrtPriceLimitX96,
         referralCode: REFERRAL_CODE
       })
@@ -167,23 +199,24 @@ contract PerpetualPositionRouter {
   fallback() external payable {
     // The first 11 bytes are padding. The 12th byte will contain the function name which we will
     // use to pick the correct decoding strategy
-    uint8 funcId = uint8(bytes1(msg.data[11:12]));
-    uint168 combinedArgs;
+    uint8 funcId = uint8(bytes1(msg.data[7:8]));
+    uint200 combinedArgs;
     uint256 amount;
     uint256 oppositeAmountBound;
     if (funcId != 5) {
       (combinedArgs, amount, oppositeAmountBound) =
-        abi.decode(msg.data, (uint168, uint256, uint256));
+        abi.decode(msg.data, (uint200, uint256, uint256));
     } else {
-      (combinedArgs, oppositeAmountBound) = abi.decode(msg.data, (uint168, uint256));
+      (combinedArgs, oppositeAmountBound) = abi.decode(msg.data, (uint200, uint256));
     }
     uint160 sqrtPriceLimitX96 = _extractSqrtPriceLimitX96(combinedArgs);
+    uint256 deadline = block.timestamp + _extractDeadline(combinedArgs);
 
-    if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcId == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcId == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96);
-    else if (funcId == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96);
+    if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
+    else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
+    else if (funcId == 3) _openLongOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
+    else if (funcId == 4) _openLongInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
+    else if (funcId == 5) _closePosition(oppositeAmountBound, sqrtPriceLimitX96, deadline);
     else revert FunctionDoesNotExist();
   }
 }

@@ -15,8 +15,12 @@ contract PerpetualPositionRouterTestHarness is PerpetualPositionRouter {
     PerpetualPositionRouter(clearingHouse, accountBalance, asset)
   {}
 
-  function extractSqrtPriceLimitX96(uint168 args) external pure returns (uint160) {
+  function extractSqrtPriceLimitX96(uint200 args) external pure returns (uint160) {
     return _extractSqrtPriceLimitX96(args);
+  }
+
+  function extractDeadline(uint200 args) external pure returns (uint32) {
+    return _extractDeadline(args);
   }
 }
 
@@ -30,8 +34,12 @@ contract PositionRouterTest is Test, PerpetualContracts {
       address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
-  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96) internal pure returns (uint168) {
-    return (uint168(funcId) << 160) | uint168(sqrtPriceLimitX96);
+  function encodeArgs(uint8 funcId, uint160 sqrtPriceLimitX96, uint32 deadline)
+    internal
+    pure
+    returns (uint200)
+  {
+    return (uint200(funcId) << 192) | uint200(sqrtPriceLimitX96) << 32 | uint200(deadline);
   }
 
   function closePositionHelper(
@@ -41,11 +49,11 @@ contract PositionRouterTest is Test, PerpetualContracts {
     uint160 sqrtPriceLimitX96
   ) internal {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 openCombinedArgs = encodeArgs(openFunc, sqrtPriceLimitX96);
+    uint200 openCombinedArgs = encodeArgs(openFunc, sqrtPriceLimitX96, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encode(openCombinedArgs, amount, oppositeAmountBound)
     );
-    uint168 closeCombinedArgs = encodeArgs(5, sqrtPriceLimitX96);
+    uint200 closeCombinedArgs = encodeArgs(5, sqrtPriceLimitX96, type(uint32).max);
     (bool okTwo,) =
       payable(vethPositionRouterAddr).call(abi.encode(closeCombinedArgs, 0, oppositeAmountBound));
     assertTrue(ok);
@@ -74,29 +82,51 @@ contract Constructor is PositionRouterTest {
   }
 }
 
+contract _ExtractDeadline is PositionRouterTest {
+  function testFuzz_SuccessfullyExtractsDeadline(
+    uint8 funcId,
+    uint160 sqrtPriceLimitX96,
+    uint32 deadline
+  ) public {
+    PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
+      clearingHouse,
+      accountBalance,
+      VETH
+    );
+
+    assertEq(harness.extractDeadline(encodeArgs(funcId, sqrtPriceLimitX96, deadline)), deadline);
+  }
+}
+
 contract _ExtractSqrtPriceLimitX96 is PositionRouterTest {
-  function testFuzz_SuccessfullyExtractsSqrtPriceLimitX96(uint8 funcId, uint160 sqrtPriceLimitX96)
-    public
-  {
+  function testFuzz_SuccessfullyExtractsSqrtPriceLimitX96(
+    uint8 funcId,
+    uint160 sqrtPriceLimitX96,
+    uint32 deadline
+  ) public {
     PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
       clearingHouse,
       accountBalance,
       VETH
     );
     assertEq(
-      harness.extractSqrtPriceLimitX96(encodeArgs(funcId, sqrtPriceLimitX96)), sqrtPriceLimitX96
+      harness.extractSqrtPriceLimitX96(encodeArgs(funcId, sqrtPriceLimitX96, deadline)),
+      sqrtPriceLimitX96
     );
   }
 
-  function testFuzz_SuccessfullyReencodeArgs(uint168 args) public {
+  function testFuzz_SuccessfullyReencodeArgs(uint200 args) public {
     PerpetualPositionRouterTestHarness harness = new PerpetualPositionRouterTestHarness(
       clearingHouse,
       accountBalance,
       VETH
     );
-    uint168 firstEightBitMask = ((1 << 8) - 1) << 160;
-    uint8 funcId = uint8((args & firstEightBitMask) >> 160);
-    assertEq(encodeArgs(funcId, harness.extractSqrtPriceLimitX96(args)), args);
+    uint200 firstEightBitMask = ((1 << 8) - 1) << 192;
+    uint8 funcId = uint8((args & firstEightBitMask) >> 192);
+    assertEq(
+      encodeArgs(funcId, harness.extractSqrtPriceLimitX96(args), harness.extractDeadline(args)),
+      args
+    );
   }
 }
 
@@ -115,7 +145,7 @@ contract Fallback is PositionRouterTest {
 
   function testFork_OpenLongExactInputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = encodeArgs(4, 0);
+    uint200 combinedArgs = encodeArgs(4, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -129,7 +159,7 @@ contract Fallback is PositionRouterTest {
 
   function testFork_OpenLongExactOutputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = encodeArgs(3, 0);
+    uint200 combinedArgs = encodeArgs(3, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
@@ -144,7 +174,7 @@ contract Fallback is PositionRouterTest {
 
   function testFork_OpenShortExactInputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = encodeArgs(2, 0);
+    uint200 combinedArgs = encodeArgs(2, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -157,7 +187,7 @@ contract Fallback is PositionRouterTest {
 
   function testFork_OpenShortExactOutputPosition() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
-    uint168 combinedArgs = encodeArgs(1, 0);
+    uint200 combinedArgs = encodeArgs(1, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -199,19 +229,19 @@ contract Fallback is PositionRouterTest {
   }
 
   function testFork_FailedCallWhenExtraCalldataArgument() public {
-    uint168 combinedArgs = encodeArgs(4, 0);
+    uint200 combinedArgs = encodeArgs(4, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0, 100));
     assertTrue(!ok);
   }
 
   function testFork_FailedClosePositionCallWithWrongArguments() public {
-    uint168 combinedArgs = encodeArgs(5, 0);
+    uint200 combinedArgs = encodeArgs(5, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     assertTrue(!ok);
   }
 
   function testFork_FailedFallbackWithZeroFuncId() public {
-    uint168 combinedArgs = encodeArgs(0, 0);
+    uint200 combinedArgs = encodeArgs(0, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     assertTrue(!ok);
   }
