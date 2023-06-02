@@ -197,7 +197,7 @@ contract PerpetualPositionRouter {
       oppositeAmountBound = uint256(uint96(bytes12(msg.data[25:37])));
     }
 
-    uint256 deadline = block.timestamp + (deadlineSeconds * 1 seconds);
+    uint256 deadline = block.timestamp + deadlineSeconds;
 
     if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
     else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
