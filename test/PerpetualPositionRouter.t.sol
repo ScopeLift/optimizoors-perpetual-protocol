@@ -71,6 +71,24 @@ contract Constructor is PositionRouterTest {
   }
 }
 
+contract Receive is PositionRouterTest {
+  function test_RevertIf_Called(uint256 amount) public {
+    PerpetualPositionRouter router = new PerpetualPositionRouter(
+        clearingHouse,
+        accountBalance,
+        VETH
+    );
+    vm.deal(address(this), amount);
+
+    vm.expectRevert(bytes(""));
+    (bool ok,) = payable(address(router)).call{value: amount}("");
+
+    assertTrue(!ok, "Call did not revert");
+    assertEq(address(this).balance, amount, "Router did not return all funds");
+    assertEq(address(router).balance, 0, "Router kept some funds");
+  }
+}
+
 contract Fallback is PositionRouterTest {
   PerpetualRouterFactory factory;
 
