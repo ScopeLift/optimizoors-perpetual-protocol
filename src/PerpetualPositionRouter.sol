@@ -42,22 +42,6 @@ contract PerpetualPositionRouter {
   // TODO: Should we deposit eth into the Perpetual vault?
   receive() external payable {}
 
-  /// @dev Returns the `sqrtPriceLimitX96` from a `uint200`.
-  /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
-  /// to open or close a position.
-  function _extractSqrtPriceLimitX96(uint200 args) internal pure returns (uint160) {
-    // Remove the deadline parameter and then only keep the positive bits in the next 160 bits
-    return uint160((args >> 32) & ((1 << 160) - 1));
-  }
-
-  /// @dev Returns the `deadline` from a `uint200`.
-  /// @param args A `uint200` that contains the `funcId`, `sqrtPriceLimitX96` and `deadline` needed
-  /// to open or close a position.
-  function _extractDeadline(uint200 args) internal pure returns (uint32) {
-    uint32 mask = (1 << 32) - 1;
-    return uint32(args & mask);
-  }
-
   /// @dev Used to open a long position that takes in the exact amount of input tokens.
   /// @param amount The input amount of the position.
   /// @param oppositeAmountBound The lower bound of the router token.
@@ -197,20 +181,23 @@ contract PerpetualPositionRouter {
   /// @notice Creates or closes a position depending on the provided `funcId`. Calldata is
   /// conditionally decoded based on the `funcId`.
   fallback() external payable {
-    // The first 11 bytes are padding. The 12th byte will contain the function name which we will
-    // use to pick the correct decoding strategy
-    uint8 funcId = uint8(bytes1(msg.data[7:8]));
-    uint200 combinedArgs;
+    uint8 funcId = uint8(bytes1(msg.data[0:1]));
     uint256 amount;
     uint256 oppositeAmountBound;
+    uint32 deadlineSeconds;
+    uint160 sqrtPriceLimitX96;
     if (funcId != 5) {
-      (combinedArgs, amount, oppositeAmountBound) =
-        abi.decode(msg.data, (uint200, uint256, uint256));
+      sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
+      deadlineSeconds = uint32(bytes4(msg.data[21:25]));
+      amount = uint256(uint96(bytes12(msg.data[25:37])));
+      oppositeAmountBound = uint256(uint96(bytes12(msg.data[37:49])));
     } else {
-      (combinedArgs, oppositeAmountBound) = abi.decode(msg.data, (uint200, uint256));
+      sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
+      deadlineSeconds = uint32(bytes4(msg.data[21:25]));
+      oppositeAmountBound = uint256(uint96(bytes12(msg.data[25:37])));
     }
-    uint160 sqrtPriceLimitX96 = _extractSqrtPriceLimitX96(combinedArgs);
-    uint256 deadline = block.timestamp + _extractDeadline(combinedArgs);
+
+    uint256 deadline = block.timestamp + deadlineSeconds;
 
     if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
     else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);

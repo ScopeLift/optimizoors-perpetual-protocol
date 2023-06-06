@@ -40,7 +40,7 @@ contract Benchmark is Script, PerpetualContracts {
 
     // Optimized ERC20 deposit in perpetual vault
     ERC20(USDC).approve(depositRtr, 250_000);
-    (bool okDepositUSDC,) = payable(depositRtr).call(abi.encode(250_000));
+    (bool okDepositUSDC,) = payable(depositRtr).call(abi.encodePacked(uint96(250_000)));
     require(okDepositUSDC, "Optimized ETH deposit");
 
     uint256 amount = 0.000000025 ether;
@@ -72,11 +72,14 @@ contract Benchmark is Script, PerpetualContracts {
     );
 
     // Optimized open exact output short VETH position
-    (bool okPosition,) = payable(positionRtr).call(abi.encode(1, amount, 0, 0));
+    (bool okPosition,) = payable(positionRtr).call(
+      abi.encodePacked(uint8(1), uint160(0), uint32(6000), uint96(amount), uint96(0))
+    );
     require(okPosition, "Optimized VETH close position");
 
     // Optimized close VETH positions
-    (bool okClose,) = payable(positionRtr).call(abi.encode(5, 0, 0, 0));
+    (bool okClose,) =
+      payable(positionRtr).call(abi.encodePacked(uint8(5), uint16(0), uint32(600), uint96(0)));
     require(okClose, "Optimized VETH close position");
 
     vm.stopBroadcast();
