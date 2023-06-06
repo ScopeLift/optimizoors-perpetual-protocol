@@ -143,7 +143,7 @@ contract Fallback is PositionRouterTest {
       address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
-  function helper_native_openPosition(
+  function openClearingHousePosition(
     address token,
     bool isBaseToQuote,
     bool isExactInput,
@@ -175,7 +175,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    helper_native_openPosition(VETH, false, true, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, false, true, uint256(1 ether), 0, type(uint32).max, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -191,7 +191,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    helper_native_openPosition(VETH, false, false, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, false, false, uint256(1 ether), 0, type(uint32).max, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -206,7 +206,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    helper_native_openPosition(VETH, true, true, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, true, true, uint256(1 ether), 0, type(uint32).max, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -221,7 +221,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    helper_native_openPosition(VETH, true, false, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, true, false, uint256(1 ether), 0, type(uint32).max, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
