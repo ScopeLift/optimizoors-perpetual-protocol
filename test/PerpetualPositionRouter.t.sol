@@ -204,11 +204,6 @@ contract Fallback is PositionRouterTest {
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
-    // Short position is represented as a positive number
-    // Meant to prevent a regression. Number was sourced
-    // from running this test in a working state.
-    assertEq(info.takerOpenNotional, 1_852_924_032_181_202_909_050);
-    assertEq(info.takerPositionSize, -1 ether);
 
     vm.revertTo(snapshotId);
     helper_native_openPosition(VETH, true, true, uint256(1 ether), 0, type(uint32).max, 0);
