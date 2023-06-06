@@ -143,21 +143,46 @@ contract Fallback is PositionRouterTest {
       address(factory.computeAddress(PerpetualRouterFactory.RouterType.PositionRouterType, VETH));
   }
 
+  function helper_native_openPosition(
+    address token,
+    bool isBaseToQuote,
+    bool isExactInput,
+    uint256 amount,
+    uint256 oppositeAmountBound,
+    uint256 deadline,
+    uint160 sqrtPriceLimitX96
+  ) internal {
+    clearingHouse.openPosition(
+      IClearingHouse.OpenPositionParams({
+        baseToken: token,
+        isBaseToQuote: isBaseToQuote,
+        isExactInput: isExactInput,
+        amount: amount,
+        oppositeAmountBound: oppositeAmountBound,
+        deadline: deadline,
+        sqrtPriceLimitX96: sqrtPriceLimitX96,
+        referralCode: bytes32("")
+      })
+    );
+  }
+
   function testFork_OpenLongExactInputPosition() public {
+    uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint200 combinedArgs = encodeArgs(4, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
 
-    // Long position is represented as a negative number
-    assertEq(info.takerOpenNotional, -1 ether);
-    // Meant to prevent regression. Number was sourced
-    // from running this test in a working state.
-    assertEq(info.takerPositionSize, 538_599_759_293_451);
+    vm.revertTo(snapshotId);
+    helper_native_openPosition(VETH, false, true, uint256(1 ether), 0, type(uint32).max, 0);
+    AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
+    assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
+    assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
   }
 
   function testFork_OpenLongExactOutputPosition() public {
+    uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint200 combinedArgs = encodeArgs(3, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -165,14 +190,15 @@ contract Fallback is PositionRouterTest {
 
     assertTrue(ok);
 
-    // Long position is represented as a negative number
-    assertEq(info.takerOpenNotional, -1_856_697_038_719_929_142_024);
-    // Meant to prevent a regression. Number was sourced
-    // from running this test in a working state.
-    assertEq(info.takerPositionSize, 1 ether);
+    vm.revertTo(snapshotId);
+    helper_native_openPosition(VETH, false, false, uint256(1 ether), 0, type(uint32).max, 0);
+    AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
+    assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
+    assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
   }
 
   function testFork_OpenShortExactInputPosition() public {
+    uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint200 combinedArgs = encodeArgs(2, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
@@ -183,19 +209,27 @@ contract Fallback is PositionRouterTest {
     // from running this test in a working state.
     assertEq(info.takerOpenNotional, 1_852_924_032_181_202_909_050);
     assertEq(info.takerPositionSize, -1 ether);
+
+    vm.revertTo(snapshotId);
+    helper_native_openPosition(VETH, true, true, uint256(1 ether), 0, type(uint32).max, 0);
+    AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
+    assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
+    assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
   }
 
   function testFork_OpenShortExactOutputPosition() public {
+    uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     uint200 combinedArgs = encodeArgs(1, 0, type(uint32).max);
     (bool ok,) = payable(vethPositionRouterAddr).call(abi.encode(combinedArgs, 1 ether, 0));
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
-    // Short position is represented as a positive number
-    assertEq(info.takerOpenNotional, 1 ether);
-    // Meant to prevent regression number was sourced
-    // from running test in a working state.
-    assertEq(info.takerPositionSize, -539_678_586_420_661);
+
+    vm.revertTo(snapshotId);
+    helper_native_openPosition(VETH, true, false, uint256(1 ether), 0, type(uint32).max, 0);
+    AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
+    assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
+    assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
   }
 
   function testFork_CloseLongExactInputPosition() public {
