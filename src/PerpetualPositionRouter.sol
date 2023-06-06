@@ -17,6 +17,9 @@ contract PerpetualPositionRouter {
   /// @dev Thrown when a user tries to take an action on a position that does not exist.
   error NoExistingPosition();
 
+  /// @dev Thrown when a function is not supported.
+  error UnsupportedFunction();
+
   /// @notice The contract used to manage positions in Perpetual.
   IClearingHouse public immutable PERPETUAL_CLEARING_HOUSE;
 
@@ -39,8 +42,13 @@ contract PerpetualPositionRouter {
     TOKEN = asset;
   }
 
-  // TODO: Should we deposit eth into the Perpetual vault?
-  receive() external payable {}
+  /// @dev if we remove this function solc will give a missing-receive-ether warning because we have
+  /// a payable fallback function. We cannot change the fallback function to a receive function
+  /// because receive does not have access to msg.data. In order to prevent a missing-receive-ether
+  /// warning we add a receive function and revert.
+  receive() external payable {
+    revert UnsupportedFunction();
+  }
 
   /// @dev Used to open a long position that takes in the exact amount of input tokens.
   /// @param amount The input amount of the position.
