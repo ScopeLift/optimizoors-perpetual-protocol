@@ -79,7 +79,7 @@ contract Benchmark is Script, PerpetualContracts {
 
     // Optimized close VETH positions
     (bool okClose,) =
-      payable(positionRtr).call(abi.encodePacked(uint8(5), uint16(0), uint32(600), uint96(0)));
+      payable(positionRtr).call(abi.encodePacked(uint8(5), uint160(0), uint32(600), uint96(0)));
     require(okClose, "Optimized VETH close position");
 
     vm.stopBroadcast();
