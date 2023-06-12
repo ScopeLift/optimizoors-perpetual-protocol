@@ -31,7 +31,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
       abi.encodePacked(
         uint8(openFunc),
         uint160(sqrtPriceLimitX96),
-        uint32(type(uint32).max),
+        uint64(block.timestamp),
         uint96(amount),
         uint96(oppositeAmountBound)
       )
@@ -40,7 +40,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
       abi.encodePacked(
         uint8(5),
         uint160(sqrtPriceLimitX96),
-        uint32(type(uint32).max),
+        uint64(block.timestamp),
         uint96(0),
         uint96(oppositeAmountBound)
       )
@@ -129,13 +129,13 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(4), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    openClearingHousePosition(VETH, false, true, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, false, true, uint256(1 ether), 0, block.timestamp, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -145,14 +145,14 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(3), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(3), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    openClearingHousePosition(VETH, false, false, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, false, false, uint256(1 ether), 0, block.timestamp, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -162,13 +162,13 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(2), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(2), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    openClearingHousePosition(VETH, true, true, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, true, true, uint256(1 ether), 0, block.timestamp, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -178,13 +178,13 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(1), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(1), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
 
     vm.revertTo(snapshotId);
-    openClearingHousePosition(VETH, true, false, uint256(1 ether), 0, type(uint32).max, 0);
+    openClearingHousePosition(VETH, true, false, uint256(1 ether), 0, block.timestamp, 0);
     AccountMarket.Info memory nativeInfo = accountBalance.getAccountInfo(address(this), VETH);
     assertEq(info.takerOpenNotional, nativeInfo.takerOpenNotional);
     assertEq(info.takerPositionSize, nativeInfo.takerPositionSize);
@@ -221,22 +221,35 @@ contract Fallback is PositionRouterTest {
   }
 
   function testFork_FailedCallWhenExtraCalldataArgument() public {
+    delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint32(type(uint32).max), uint96(0), uint96(100))
+      abi.encodePacked(uint8(4), uint160(0), uint64(block.timestamp), uint96(0), uint96(100))
     );
     assertTrue(!ok);
   }
 
   function testFork_FailedClosePositionCallWithWrongArguments() public {
+    delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(5), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(5), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
     );
     assertTrue(!ok);
   }
 
   function testFork_FailedFallbackWithZeroFuncId() public {
+    delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(0), uint160(0), uint32(type(uint32).max), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(0), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+    );
+    assertTrue(!ok);
+  }
+
+  function testFork_FailedDeadlineHasExpired() public {
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+    (bool ok,) = payable(vethPositionRouterAddr).call(
+      abi.encodePacked(
+        uint8(1), uint160(0), uint64(block.timestamp - 1000 - 1000), uint96(1 ether), uint96(0)
+      )
     );
     assertTrue(!ok);
   }
