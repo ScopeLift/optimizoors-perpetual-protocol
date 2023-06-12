@@ -248,7 +248,7 @@ contract Fallback is PositionRouterTest {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(
-        uint8(1), uint160(0), uint32(block.timestamp - 1000 - 1000), uint96(1 ether), uint96(0)
+        uint8(1), uint160(0), uint32(block.timestamp - 1000), uint96(1 ether), uint96(0)
       )
     );
     assertTrue(!ok);
