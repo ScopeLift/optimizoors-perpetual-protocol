@@ -31,7 +31,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
       abi.encodePacked(
         uint8(openFunc),
         uint160(sqrtPriceLimitX96),
-        uint64(block.timestamp),
+        uint32(block.timestamp),
         uint96(amount),
         uint96(oppositeAmountBound)
       )
@@ -40,7 +40,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
       abi.encodePacked(
         uint8(5),
         uint160(sqrtPriceLimitX96),
-        uint64(block.timestamp),
+        uint32(block.timestamp),
         uint96(0),
         uint96(oppositeAmountBound)
       )
@@ -129,7 +129,7 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -145,7 +145,7 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(3), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(3), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
 
@@ -162,7 +162,7 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(2), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(2), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -178,7 +178,7 @@ contract Fallback is PositionRouterTest {
     uint256 snapshotId = vm.snapshot();
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(1), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(1), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     AccountMarket.Info memory info = accountBalance.getAccountInfo(address(this), VETH);
     assertTrue(ok);
@@ -223,7 +223,7 @@ contract Fallback is PositionRouterTest {
   function testFork_FailedCallWhenExtraCalldataArgument() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint64(block.timestamp), uint96(0), uint96(100))
+      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(0), uint96(100))
     );
     assertTrue(!ok);
   }
@@ -231,7 +231,7 @@ contract Fallback is PositionRouterTest {
   function testFork_FailedClosePositionCallWithWrongArguments() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(5), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(5), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     assertTrue(!ok);
   }
@@ -239,7 +239,7 @@ contract Fallback is PositionRouterTest {
   function testFork_FailedFallbackWithZeroFuncId() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(0), uint160(0), uint64(block.timestamp), uint96(1 ether), uint96(0))
+      abi.encodePacked(uint8(0), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
     assertTrue(!ok);
   }
@@ -248,7 +248,7 @@ contract Fallback is PositionRouterTest {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(
-        uint8(1), uint160(0), uint64(block.timestamp - 1000 - 1000), uint96(1 ether), uint96(0)
+        uint8(1), uint160(0), uint32(block.timestamp - 1000 - 1000), uint96(1 ether), uint96(0)
       )
     );
     assertTrue(!ok);
