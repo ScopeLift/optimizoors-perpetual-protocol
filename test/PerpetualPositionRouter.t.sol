@@ -83,7 +83,7 @@ contract Receive is PositionRouterTest {
     vm.expectRevert(bytes(""));
     (bool ok,) = payable(address(router)).call{value: amount}("");
 
-    assertTrue(!ok, "Call did not revert");
+    assertFalse(ok, "Call did not revert");
     assertEq(address(this).balance, amount, "Router did not return all funds");
     assertEq(address(router).balance, 0, "Router kept some funds");
   }
@@ -225,7 +225,7 @@ contract Fallback is PositionRouterTest {
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(0), uint96(100))
     );
-    assertTrue(!ok);
+    assertFalse(ok);
   }
 
   function testFork_FailedClosePositionCallWithWrongArguments() public {
@@ -233,7 +233,7 @@ contract Fallback is PositionRouterTest {
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(5), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertTrue(!ok);
+    assertFalse(ok);
   }
 
   function testFork_FailedFallbackWithZeroFuncId() public {
@@ -241,7 +241,7 @@ contract Fallback is PositionRouterTest {
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(0), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertTrue(!ok);
+    assertFalse(ok);
   }
 
   function testFork_FailedDeadlineHasExpired() public {
@@ -251,6 +251,6 @@ contract Fallback is PositionRouterTest {
         uint8(1), uint160(0), uint32(block.timestamp - 1000), uint96(1 ether), uint96(0)
       )
     );
-    assertTrue(!ok);
+    assertFalse(ok);
   }
 }
