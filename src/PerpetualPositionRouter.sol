@@ -192,20 +192,18 @@ contract PerpetualPositionRouter {
     uint8 funcId = uint8(bytes1(msg.data[0:1]));
     uint256 amount;
     uint256 oppositeAmountBound;
-    uint32 deadlineSeconds;
+    uint256 deadline;
     uint160 sqrtPriceLimitX96;
     if (funcId != 5) {
       sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
-      deadlineSeconds = uint32(bytes4(msg.data[21:25]));
+      deadline = uint256(uint32(bytes4(msg.data[21:25])));
       amount = uint256(uint96(bytes12(msg.data[25:37])));
       oppositeAmountBound = uint256(uint96(bytes12(msg.data[37:49])));
     } else {
       sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
-      deadlineSeconds = uint32(bytes4(msg.data[21:25]));
+      deadline = uint256(uint32(bytes4(msg.data[21:25])));
       oppositeAmountBound = uint256(uint96(bytes12(msg.data[25:37])));
     }
-
-    uint256 deadline = block.timestamp + deadlineSeconds;
 
     if (funcId == 1) _openShortOutput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
     else if (funcId == 2) _openShortInput(amount, oppositeAmountBound, sqrtPriceLimitX96, deadline);
