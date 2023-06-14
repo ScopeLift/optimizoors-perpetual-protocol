@@ -38,11 +38,7 @@ contract PositionRouterTest is Test, PerpetualContracts {
     );
     (bool okTwo,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(
-        uint8(5),
-        uint160(sqrtPriceLimitX96),
-        uint32(block.timestamp),
-        uint96(0),
-        uint96(oppositeAmountBound)
+        uint8(5), uint160(sqrtPriceLimitX96), uint32(block.timestamp), uint96(oppositeAmountBound)
       )
     );
     assertTrue(ok);
@@ -222,35 +218,42 @@ contract Fallback is PositionRouterTest {
 
   function testFork_FailedCallWhenExtraCalldataArgument() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+
+    vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(0), uint96(100))
+      abi.encodePacked(
+        uint8(4), uint160(0), uint32(block.timestamp), uint96(10), uint96(100), uint96(0)
+      )
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_FailedClosePositionCallWithWrongArguments() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(5), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_FailedFallbackWithZeroFuncId() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(PerpetualPositionRouter.FunctionDoesNotExist.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(0), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_FailedDeadlineHasExpired() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(bytes("CH_TE"));
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(
         uint8(1), uint160(0), uint32(block.timestamp - 1000), uint96(1 ether), uint96(0)
       )
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 }
