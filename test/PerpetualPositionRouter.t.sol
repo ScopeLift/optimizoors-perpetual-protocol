@@ -41,7 +41,6 @@ contract PositionRouterTest is Test, PerpetualContracts {
         uint8(5),
         uint160(sqrtPriceLimitX96),
         uint32(block.timestamp),
-        uint96(0),
         uint96(oppositeAmountBound)
       )
     );
@@ -222,35 +221,40 @@ contract Fallback is PositionRouterTest {
 
   function testFork_RevertIf_CallWhenExtraCalldataArgument() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+
+    vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
-      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(0), uint96(100))
+      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(10), uint96(100), uint96(0))
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_RevertIf_ClosePositionCallWithWrongArguments() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(5), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_RevertIf_FallbackWithZeroFuncId() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(PerpetualPositionRouter.FunctionDoesNotExist.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(uint8(0), uint160(0), uint32(block.timestamp), uint96(1 ether), uint96(0))
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 
   function testFork_RevertIf_DeadlineHasExpired() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
+    vm.expectRevert(bytes("CH_TE"));
     (bool ok,) = payable(vethPositionRouterAddr).call(
       abi.encodePacked(
         uint8(1), uint160(0), uint32(block.timestamp - 1000), uint96(1 ether), uint96(0)
       )
     );
-    assertFalse(ok);
+    assertTrue(ok);
   }
 }
