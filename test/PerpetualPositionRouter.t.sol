@@ -216,7 +216,7 @@ contract Fallback is PositionRouterTest {
     assertEq(info.takerPositionSize, 0);
   }
 
-  function testFork_FailedCallWhenExtraCalldataArgument() public {
+  function testFork_RevertIf_CallWhenExtraCalldataArgument() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
 
     vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
@@ -228,7 +228,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
   }
 
-  function testFork_FailedClosePositionCallWithWrongArguments() public {
+  function testFork_RevertIf_ClosePositionCallWithWrongArguments() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
@@ -237,7 +237,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
   }
 
-  function testFork_FailedFallbackWithZeroFuncId() public {
+  function testFork_RevertIf_FallbackWithZeroFuncId() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     vm.expectRevert(PerpetualPositionRouter.FunctionDoesNotExist.selector);
     (bool ok,) = payable(vethPositionRouterAddr).call(
@@ -246,7 +246,7 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
   }
 
-  function testFork_FailedDeadlineHasExpired() public {
+  function testFork_RevertIf_DeadlineHasExpired() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     vm.expectRevert(bytes("CH_TE"));
     (bool ok,) = payable(vethPositionRouterAddr).call(
