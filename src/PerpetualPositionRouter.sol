@@ -14,6 +14,9 @@ contract PerpetualPositionRouter {
   /// @dev Thrown when calldata provides a function ID that does not exist.
   error FunctionDoesNotExist();
 
+  /// @dev Thrown when calldata is invalid for the provided function id.
+  error InvalidCalldata();
+
   /// @dev Thrown when a user tries to take an action on a position that does not exist.
   error NoExistingPosition();
 
@@ -195,11 +198,13 @@ contract PerpetualPositionRouter {
     uint256 deadline;
     uint160 sqrtPriceLimitX96;
     if (funcId != 5) {
+      if (msg.data.length != 49) revert InvalidCalldata();
       sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
       deadline = uint256(uint32(bytes4(msg.data[21:25])));
       amount = uint256(uint96(bytes12(msg.data[25:37])));
       oppositeAmountBound = uint256(uint96(bytes12(msg.data[37:49])));
     } else {
+      if (msg.data.length != 37) revert InvalidCalldata();
       sqrtPriceLimitX96 = uint160(bytes20(msg.data[1:21]));
       deadline = uint256(uint32(bytes4(msg.data[21:25])));
       oppositeAmountBound = uint256(uint96(bytes12(msg.data[25:37])));
