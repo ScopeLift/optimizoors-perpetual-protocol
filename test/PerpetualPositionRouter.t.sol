@@ -228,6 +228,16 @@ contract Fallback is PositionRouterTest {
     assertTrue(ok);
   }
 
+  function testFork_RevertIf_CallWhenNotEnoughCalldata() public {
+    delegateApproval.approve(vethPositionRouterAddr, 1);
+
+    vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
+    (bool ok,) = payable(vethPositionRouterAddr).call(
+      abi.encodePacked(uint8(4), uint160(0), uint32(block.timestamp), uint96(10), uint8(1))
+    );
+    assertTrue(ok);
+  }
+
   function testFork_RevertIf_ClosePositionCallWithWrongArguments() public {
     delegateApproval.approve(vethPositionRouterAddr, 1);
     vm.expectRevert(PerpetualPositionRouter.InvalidCalldata.selector);
