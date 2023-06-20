@@ -1,13 +1,12 @@
 # Perpetual Protocol Optimizoors
 
-<p align="center">
-  <b>This repo does not contain production ready code and is still a work in progress.</b>
-</p>
+⚠️ **This code is not audited. Use at your own risk.**
 
 - [About](#about)
 - [Development](#development)
   - [Instructions](#instructions)
 - [License](#license)
+
 
 ## About
 
