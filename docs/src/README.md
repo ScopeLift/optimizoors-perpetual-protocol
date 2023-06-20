@@ -5,8 +5,6 @@
 - [About](#about)
 - [Development](#development)
   - [Instructions](#instructions)
-  - [Contracts](docs/src/SUMMARY.md)
-  - [Addresses](#addresses)
 - [License](#license)
 
 
@@ -32,12 +30,6 @@ forge test
 # Build smart contracts
 forge build
 ```
-
-## Addresses
-
-| Name   |    Address      |
-|----------|:-------------:|
-| Perpetual Router Factory |  0xbF2870611603b2f02B8616E0fE65C60f7657a0f4|
 
 ### How it works
 
