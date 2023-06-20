@@ -5,7 +5,6 @@
 - [About](#about)
 - [Development](#development)
   - [Instructions](#instructions)
-  - [Contracts](docs/src/SUMMARY.md)
 - [License](#license)
 
 
